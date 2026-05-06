@@ -296,14 +296,31 @@ Benjamini-Hochberg method [@benjaminiHighberg1995].
 ### Evaluation of the existing ankle draft model
 
 Applying it to the experimental data, we calculated the predicted
-percentage of dissatisfaction with ankle draft at each observation
-point. Predictions were then averaged by experimental condition and
-compared with the observed dissatisfaction percentages. We used
-calibration curves to quantitatively assess the model's predictive
-performance in this study's dataset [@vancalster2016] and report the
-calibration intercept and slope, AUC, and Brier score. All analyses were
-implemented using the R package CalibrationCurves
-[@deCockCalibrationCurves2023].
+percentage of dissatisfaction with ankle draft using the existing ankle
+draft model at each observation point. For each observation, a logistic
+regression model was fitted with the individual-level predicted
+probability as the independent variable and the observed binary outcome
+(ankle draft dissatisfaction (1) or satisfaction (0)) as the dependent
+variable to form a calibration curve to assess the agreement between
+predicted probabilities and observed proportions [@vancalster2016].
+Model performance was further evaluated using the C (ROC) and the Brier
+score. The C (ROC) quantifies the model's discriminative ability,
+defined as the probability that a randomly selected dissatisfied
+observation receives a higher predicted probability than a randomly
+selected satisfied observation [@AlbaCROC2017]. The Brier score measures
+the overall accuracy of probabilistic predictions [@GLENNBrier1950] and
+is defined as:
+
+$$
+\mathrm{Brier\ score} = \frac{1}{N}\sum_{i=1}^{N}(p_i - y_i)^2,
+$$
+
+where $p_i$ is the predicted probability from the existing model for
+the $i$-th observation, and $y_i$ is the corresponding binary outcome
+indicating ankle draft dissatisfaction (1) or satisfaction (0). In
+addition, predictions were averaged by experimental condition and
+compared with the observed dissatisfaction percentages to examine
+differences in prediction accuracy across conditions.
 
 ### Development of the new ankle draft model
 
@@ -312,11 +329,8 @@ model with a binomial distribution and logit link, as the outcome was
 binary and repeated observations were correlated within subjects. We
 included the subject as a random intercept to account for
 between-subject heterogeneity and within-subject dependence arising from
-repeated measurements. To enable an integrated analysis of the effects
-of different clothing conditions on ankle draft dissatisfaction, we also
-included data from @liuPredictedPercentageDissatisfied2017 in the
-modeling dataset. Continuous predictors were mean-centered using the
-overall means of the combined dataset before model fitting.
+repeated measurements. Continuous predictors were mean-centered using
+the overall means of the dataset before model fitting.
 
 In this generalized linear mixed model, the inverse-logit transformation
 is nonlinear. As a result, direct back-transformation of the
@@ -759,44 +773,46 @@ liu_max_diff_speed <- liu_diff_by_speed %>% dplyr::slice(1) %>% dplyr::pull(sess
 liu_min_diff_speed <- liu_diff_by_speed %>% dplyr::slice(n()) %>% dplyr::pull(session_air_flow)
 ```
 
-@fig-model-comp(a) compares the dissatisfaction rates predicted by the
-Liu model against our experimental observations. Across all conditions,
-the existing model consistently overpredicted local thermal
-dissatisfaction. At a 15°C ankle temperature, the discrepancy between
-predicted and observed rates widened as air speed increased: the model
-overpredicted dissatisfaction by `r res$diff[1]` percentage points (pp),
-rising to `r res$diff[3]` pp at high flow (0.6 m/s).
+For each observation sample, the predicted percentage of
+dissatisfaction with ankle draft using the existing ankle draft model
+based on ankle-level air speed and whole-body thermal sensation was
+fitted against the observed binary outcome of ankle draft
+satisfaction/dissatisfaction using logistic regression. The resulting
+curve is shown in @fig-model-comp(a). If the model were well
+calibrated, the curve would be expected to closely follow the 45° ideal
+line. Overall, the existing model retained acceptable discriminative
+ability in the present dataset (C (ROC) =
+`r sprintf("%.3f", liu_calibration_stats["C (ROC)"])`), indicating that
+it could generally distinguish observations with higher versus lower
+likelihood of ankle draft dissatisfaction. However, the curve was
+located predominantly below the ideal line, and the Brier score was
+`r sprintf("%.3f", liu_calibration_stats["Brier"])`, suggesting that the
+existing model systematically overestimated the probability of ankle
+draft dissatisfaction under winter conditions.
 
-We observed similar trends at 17°C and 19°C. Notably, for the 19°C
-condition at high air speed (0.6 m/s), the model predicted a PPD of
-`r res$ppd_liu_mean[9]`%, while the actual dissatisfied rate was only
-`r res$dissatisfied_rate[9]`%, resulting in a mean overestimation of
-`r res$diff[9]` pp. Across all experimental sessions, the model
-overpredicted dissatisfaction by an average of `r round(mean(res$diff))`
-pp.
-
-![Performance and calibration of the Liu local dissatisfaction model:
-(a) The model consistently overpredicted ankle-level dissatisfaction
-across all conditions, with discrepancies widening at higher air speeds
-(points represent mean values, with the segment length indicating the
-magnitude of model overestimation); (b) while maintaining acceptable
-discrimination (AUC =
-`r sprintf("%.2f", liu_calibration_stats["C (ROC)"])`), the calibration
-curve confirms a systematic overestimation of dissatisfaction in winter
-conditions.](figs/model_error_combined.png){#fig-model-comp width="90%"}
-
-In addition, as shown in @fig-model-comp(b), the model retained
-acceptable discrimination on this dataset (AUC =
-`r sprintf("%.3f", liu_calibration_stats["C (ROC)"])`), the calibration
-results indicated a systematic overestimation under winter conditions.
-Across the nine experimental conditions, the mean observed
-dissatisfaction rate was `r liu_model_summary$mean_observed`%, whereas
-the Liu model predicted an average of
-`r liu_model_summary$mean_predicted`%, corresponding to an
+@fig-model-comp(b) compares the dissatisfaction rates predicted by the
+existing model against our experimental observations under each
+experimental condition. Across all conditions, the existing model
+consistently overpredicted local thermal dissatisfaction. At a 15°C
+ankle temperature, the discrepancy between predicted and observed rates
+widened as air speed increased: the model overpredicted dissatisfaction
+by `r res$diff[1]` percentage points (pp), rising to `r res$diff[3]` pp
+at high flow (0.6 m/s). We observed similar trends at 17°C and 19°C.
+Notably, for the 19°C condition at high air speed (0.6 m/s), the model
+predicted a PPD of `r res$ppd_liu_mean[9]`%, while the actual
+dissatisfied rate was only `r res$dissatisfied_rate[9]`%, resulting in a
+mean overestimation of `r res$diff[9]` pp. Across the nine experimental
+conditions, the mean observed dissatisfaction rate was
+`r liu_model_summary$mean_observed`%, whereas the Liu model predicted an
+average of `r liu_model_summary$mean_predicted`%, corresponding to an
 overestimation of approximately
-`r liu_model_summary$overprediction_ratio` times. The discrepancy was
-greatest at `r liu_max_diff_speed` air speed and smaller, but still
-evident, at `r liu_min_diff_speed` air speed.
+`r liu_model_summary$overprediction_ratio` times.
+
+![Performance of the existing ankle draft model: (a) calibration curve
+of the existing model on this study dataset, and (b) predicted and
+observed dissatisfaction under each experimental conditions (points
+represent mean values, with the segment length indicating the magnitude
+of model overestimation)](figs/model_performance_combined_raw.png){#fig-model-comp width="90%"}
 
 ## Updated model for winter conditions
 
@@ -902,15 +918,24 @@ model_final_table <- dplyr::bind_rows(
   dplyr::select(model_display, term_label, estimate_fmt, std_error_fmt, z_value_fmt, p_value_fmt)
 ```
 
-As shown in @tbl-updated-model-screening, in the mixed-effects model
-including all candidate predictors, air speed at ankle, whole-body
-thermal sensation, and ankle condition were significantly associated
-with draft dissatisfaction at the ankle, whereas room air temperature,
-air temperature at ankle, and turbulence intensity were not significant
-within the range investigated in this study. Based on these results,
-separate mixed-effects models for ankle draft dissatisfaction were
-developed for the ankle-uncovered and ankle-covered conditions, using
-air speed at ankle and whole-body thermal sensation as predictors.
+As shown in Section 3.4, the existing model showed limited accuracy in
+predicting ankle draft dissatisfaction under winter conditions. This
+highlights the need for a revised model that accounts for differences in
+application contexts. To enable an integrated analysis of the effects of
+different factors on ankle draft dissatisfaction, we combined data from
+@liuPredictedPercentageDissatisfied2017 and collected in this study in
+the modeling dataset.
+
+To identify significant predictors, a model including all candidate
+predictors was first fitted following the methods described in Section
+2.6.4. Given that both datasets were obtained from repeated
+measurements, subject-level dependence was accounted for in the
+analysis. The result of the screening model is shown in
+@tbl-updated-model-screening, ankle-level air speed, whole-body thermal
+sensation, and ankle condition were significantly correlated with ankle
+draft dissatisfaction, whereas room air temperature, ankle-level air
+temperature, and turbulence intensity were not significant within the
+range investigated in this study.
 
 ```{r}
 #| label: tbl-updated-model-screening
@@ -923,6 +948,19 @@ knitr::kable(
 )
 ```
 
+Based on these results, separate mixed-effects models for ankle draft
+dissatisfaction were developed for the ankle-uncovered and
+ankle-covered conditions, using ankle-level air speed and whole-body
+thermal sensation as predictors. As shown in @tbl-updated-model-final,
+the two final models exhibited the same structure but different
+coefficients. The intercept of the covered model was
+`r sprintf("%.2f", abs(glmm_delta_intercept))` units lower than that of
+the uncovered model, indicating a lower baseline risk of ankle draft
+dissatisfaction when the ankle was covered by clothing. In addition,
+the air speed coefficient was smaller in the covered model than in the
+uncovered model, indicating reduced sensitivity of dissatisfaction to
+air speed under ankle-covered conditions.
+
 ```{r}
 #| label: tbl-updated-model-final
 #| tbl-cap: "Generalized linear mixed-effects models for the ankle-uncovered and ankle-covered conditions."
@@ -933,16 +971,6 @@ knitr::kable(
   col.names = c("Condition", "Predictor", "Estimate", "SE", "z", "p")
 )
 ```
-
-As shown in @tbl-updated-model-final, the two final models exhibited the
-same structure but different coefficients. The intercept of the covered
-model was `r sprintf("%.2f", abs(glmm_delta_intercept))` units lower
-than that of the uncovered model, indicating a substantially lower
-baseline risk of ankle draft dissatisfaction when the ankle was covered
-by clothing. In addition, the air speed coefficient was smaller in the
-covered model than in the uncovered model, indicating reduced
-sensitivity of dissatisfaction to air velocity under ankle-covered
-conditions.
 
 For the ankle-uncovered condition, the approximate closed-form equation
 derived from the marginal predictions of the mixed-effects model can be
