@@ -72,30 +72,45 @@ write_csv(
 
 # 1.1 Subject Demographics -----------------------------------------------------
 
+# 1. Create a helper function to calculate and format Median [IQR]
+# This avoids massive code duplication
+format_median_iqr <- function(x, digits = 1) {
+  med <- median(x, na.rm = TRUE)
+  q25 <- quantile(x, 0.25, na.rm = TRUE)
+  q75 <- quantile(x, 0.75, na.rm = TRUE) # Fixed the ':=' to '=' here
+  
+  # Dynamic string formatting based on requested decimal places
+  fmt <- paste0("%.", digits, "f [%.", digits, "f, %.", digits, "f]")
+  sprintf(fmt, med, q25, q75)
+}
+
+# 2. Process the dataset
 demographic_d <- subjects %>%
   dplyr::mutate(bmi = weight_kg / (height_m^2)) %>%
+  # Grouped summary (by sex)
   group_by(sex) %>%
   summarise(
     n = n(),
-    age = sprintf("%.1f (+/- %.1f)", mean(age, na.rm = TRUE), sd(age, na.rm = TRUE)),
-    height = sprintf("%.2f (+/- %.2f)", mean(height_m, na.rm = TRUE), sd(height_m, na.rm = TRUE)),
-    weight = sprintf("%.1f (+/- %.1f)", mean(weight_kg, na.rm = TRUE), sd(weight_kg, na.rm = TRUE)),
-    bmi = sprintf("%.1f (+/- %.1f)", mean(bmi, na.rm = TRUE), sd(bmi, na.rm = TRUE))
+    age    = format_median_iqr(age, 1),
+    height = format_median_iqr(height_m, 2), # height usually needs 2 decimals
+    weight = format_median_iqr(weight_kg, 1),
+    bmi    = format_median_iqr(bmi, 1)
   ) %>%
+  # Bind the "All" summary row
   bind_rows(
     subjects %>%
       dplyr::mutate(bmi = weight_kg / (height_m^2)) %>%
       summarise(
         sex = "all",
         n = n(),
-        age = sprintf("%.1f (+/- %.1f)", mean(age, na.rm = TRUE), sd(age, na.rm = TRUE)),
-        height = sprintf("%.2f (+/- %.2f)", mean(height_m, na.rm = TRUE), sd(height_m, na.rm = TRUE)),
-        weight = sprintf("%.1f (+/- %.1f)", mean(weight_kg, na.rm = TRUE), sd(weight_kg, na.rm = TRUE)),
-        bmi = sprintf("%.1f (+/- %.1f)", mean(bmi, na.rm = TRUE), sd(bmi, na.rm = TRUE))
+        age    = format_median_iqr(age, 1),
+        height = format_median_iqr(height_m, 2),
+        weight = format_median_iqr(weight_kg, 1),
+        bmi    = format_median_iqr(bmi, 1)
       ),
     .
   ) %>%
-  mutate(sex = stringr::str_to_title(sex))  # capitalize for table rendering
+  mutate(sex = stringr::str_to_title(sex))
 
 # 1.2 Environmental Conditions -------------------------------------------------
 
@@ -115,12 +130,12 @@ env_airflow <- env_sessions %>%
         low_v_air_s, med_v_air_s, high_v_air_s,
         low_turbulence_intensity, med_turbulence_intensity, high_turbulence_intensity
       ),
-      .fns = \(x) paste0(round(mean(x, na.rm = TRUE), 2), " ( +/- ", round(sd(x, na.rm = TRUE), 2), ")")
+      .fns = \(x) paste0(round(mean(x, na.rm = TRUE), 2), " ( ± ", round(sd(x, na.rm = TRUE), 2), ")")
     ),
     # One decimal place
     across(
       .cols = c(t_air_c, rh_percent, t_supply_c),
-      .fns = \(x) paste0(round(mean(x, na.rm = TRUE), 1), " ( +/- ", round(sd(x, na.rm = TRUE), 1), ")")
+      .fns = \(x) paste0(round(mean(x, na.rm = TRUE), 1), " ( ± ", round(sd(x, na.rm = TRUE), 1), ")")
     )
   ) %>%
   dplyr::select(t_air_c, rh_percent, t_supply_c, everything())
