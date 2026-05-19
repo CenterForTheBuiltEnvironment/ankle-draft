@@ -79,7 +79,7 @@ format_median_iqr <- function(x, digits = 1) {
   q25 <- quantile(x, 0.25, na.rm = TRUE)
   q75 <- quantile(x, 0.75, na.rm = TRUE) # Fixed the ':=' to '=' here
   
-  # Dynamic string formatting based on requested decimal places
+  # Dynamic string formatting for decimal places
   fmt <- paste0("%.", digits, "f [%.", digits, "f, %.", digits, "f]")
   sprintf(fmt, med, q25, q75)
 }
@@ -313,8 +313,6 @@ thermal_preference_ankle_summary <- thermal_preference_d %>%
 
 # 2.1.3 Thermal acceptability ----
 
-vertical_gap <- 0.2  # visual gap between acceptable/unacceptable regions
-
 thermal_acceptability_d <- analysis %>%
   dplyr::filter(
     question == "thermal_acceptability",
@@ -387,13 +385,63 @@ thermal_perception_overall_p <- (thermal_sensation_overall_p / thermal_preferenc
   )
 
 ggsave(
-  here::here("manuscript", "figs", "thermal_perception_overall.png"),
+  here::here("manuscript", "figs", "supp_thermal_perception_overall.png"),
   plot = thermal_perception_overall_p,
   dpi = 500,
   width = single_col_width,
   height = 120,
   units = "mm",
   bg = "transparent"
+)
+
+# Scatter + LM: Thermal sensation, whole body ----------------------------------
+
+y_sensation <- list(
+  breaks = seq(-3, 3, 1),
+  labels = c("Cold", "Cool", "Sl. cool", "Neutral", "Sl. warm", "Warm", "Hot")
+)
+
+ts_scatter_overall <- thermal_sensation_overall_d_raw %>%
+  tidyr::drop_na(response_value_num, v_air_m_s, t_supply_c)
+
+p_ts_temp <- plot_scatter_lm(
+  ts_scatter_overall, "t_supply_c", "response_value_num", "workstation",
+  workstation_palette,
+  x_label     = "Ankle air temperature (°C)",
+  y_label     = "Whole-body thermal sensation vote",
+  y_breaks    = y_sensation$breaks,
+  y_labels    = y_sensation$labels,
+  color_title = "Air speed",
+  x_breaks    = x_temp_scale$breaks,
+  x_limits    = x_temp_scale$limits
+)
+
+p_ts_speed <- plot_scatter_lm(
+  ts_scatter_overall, "v_air_m_s", "response_value_num", "session_sat",
+  session_sat_palette,
+  x_label     = "Ankle air speed (m/s)",
+  y_label     = "Whole-body thermal sensation vote",
+  y_breaks    = y_sensation$breaks,
+  y_labels    = y_sensation$labels,
+  color_title = "Supply temp.",
+  x_breaks    = x_speed_scale$breaks,
+  x_limits    = x_speed_scale$limits
+)
+
+ts_overall_scatter_p <-
+  (p_ts_temp | (p_ts_speed + no_y_theme)) +
+  plot_layout() +
+  patchwork_theme[[1]] &
+  patchwork_theme[[2]]
+
+ggsave(
+  here::here("manuscript", "figs", "thermal_sensation_overall.png"),
+  plot   = ts_overall_scatter_p,
+  dpi    = 500,
+  width  = double_col_width,
+  height = 80,
+  units  = "mm",
+  bg     = "transparent"
 )
 
 # 2.5 Thermal Acceptability ----------------------------------------------------
@@ -466,13 +514,52 @@ thermal_acceptability_p <- thermal_acceptability_d %>%
   )
 
 ggsave(
-  here::here("manuscript", "figs", "thermal_acceptability_overall.png"),
+  here::here("manuscript", "figs", "supp_thermal_acceptability_overall.png"),
   plot = thermal_acceptability_p,
   dpi = 500,
   width = double_col_width,
   height = 80,
   units = "mm",
   bg = "transparent"
+)
+
+# Scatter + LM: Thermal acceptability, whole body ------------------------------
+
+ta_scatter_overall <- thermal_acceptability_d %>%
+  tidyr::drop_na(response_value, v_air_m_s, t_supply_c)
+
+p_ta_temp <- plot_acc_scatter(
+  ta_scatter_overall, "t_supply_c", "workstation", workstation_palette,
+  x_label     = "Ankle air temperature (°C)",
+  y_label     = "Thermal acceptability",
+  color_title = "Air speed",
+  x_breaks    = x_temp_scale$breaks,
+  x_limits    = x_temp_scale$limits
+)
+
+p_ta_speed <- plot_acc_scatter(
+  ta_scatter_overall, "v_air_m_s", "session_sat", session_sat_palette,
+  x_label     = "Ankle air speed (m/s)",
+  y_label     = "Thermal acceptability",
+  color_title = "Supply temp.",
+  x_breaks    = x_speed_scale$breaks,
+  x_limits    = x_speed_scale$limits
+)
+
+ta_overall_scatter_p <-
+  (p_ta_temp | (p_ta_speed + no_y_theme)) +
+  plot_layout() +
+  patchwork_theme[[1]] &
+  patchwork_theme[[2]]
+
+ggsave(
+  here::here("manuscript", "figs", "thermal_acceptability_overall.png"),
+  plot   = ta_overall_scatter_p,
+  dpi    = 500,
+  width  = double_col_width,
+  height = 80,
+  units  = "mm",
+  bg     = "transparent"
 )
 
 
@@ -537,13 +624,58 @@ thermal_perception_ankle_p <- (thermal_sensation_ankles_p / thermal_preference_a
   )
 
 ggsave(
-  here::here("manuscript", "figs", "thermal_perception_ankle.png"),
+  here::here("manuscript", "figs", "supp_thermal_perception_ankle.png"),
   plot = thermal_perception_ankle_p,
   dpi = 500,
   width = single_col_width,
   height = 120,
   units = "mm",
   bg = "transparent"
+)
+
+# Scatter + LM: Thermal sensation, ankles --------------------------------------
+
+ts_scatter_ankles <- thermal_sensation_ankles_d_raw %>%
+  tidyr::drop_na(response_value_num, v_air_m_s, t_supply_c)
+
+p_tsa_temp <- plot_scatter_lm(
+  ts_scatter_ankles, "t_supply_c", "response_value_num", "workstation",
+  workstation_palette,
+  x_label     = "Ankle air temperature (°C)",
+  y_label     = "Ankle-level thermal sensation vote",
+  y_breaks    = y_sensation$breaks,
+  y_labels    = y_sensation$labels,
+  color_title = "Air speed",
+  x_breaks    = x_temp_scale$breaks,
+  x_limits    = x_temp_scale$limits
+)
+
+p_tsa_speed <- plot_scatter_lm(
+  ts_scatter_ankles, "v_air_m_s", "response_value_num", "session_sat",
+  session_sat_palette,
+  x_label     = "Ankle air speed (m/s)",
+  y_label     = "Ankle-level thermal sensation vote",
+  y_breaks    = y_sensation$breaks,
+  y_labels    = y_sensation$labels,
+  color_title = "Supply temp.",
+  x_breaks    = x_speed_scale$breaks,
+  x_limits    = x_speed_scale$limits
+)
+
+ts_ankle_scatter_p <-
+  (p_tsa_temp | (p_tsa_speed + no_y_theme)) +
+  plot_layout() +
+  patchwork_theme[[1]] &
+  patchwork_theme[[2]]
+
+ggsave(
+  here::here("manuscript", "figs", "thermal_sensation_ankle.png"),
+  plot   = ts_ankle_scatter_p,
+  dpi    = 500,
+  width  = double_col_width,
+  height = 80,
+  units  = "mm",
+  bg     = "transparent"
 )
 
 # 3.4 Air Movement Acceptability (Ankles) --------------------------------------
@@ -661,13 +793,78 @@ air_movement_p <- (air_movement_acceptability_p / air_movement_preference_p) +
   )
 
 ggsave(
-  here::here("manuscript", "figs", "air_movement_acc_pref.png"),
+  here::here("manuscript", "figs", "supp_air_movement_acc_pref.png"),
   plot = air_movement_p,
   dpi = 500,
   width = single_col_width,
   height = 120,
   units = "mm",
   bg = "transparent"
+)
+
+# Scatter + LM: Air movement acceptability, ankles -----------------------------
+
+am_scatter_acc <- air_movement_acceptability_d %>%
+  tidyr::drop_na(response_value_num, v_air_m_s, t_supply_c) %>%
+  dplyr::mutate(
+    response_plot = ifelse(response_value_num > 0,
+                           response_value_num + vertical_gap,
+                           response_value_num)
+  )
+
+p_ama_temp <- plot_acc_scatter(
+  am_scatter_acc, "t_supply_c", "workstation", workstation_palette,
+  x_label     = "Ankle air temperature (°C)",
+  y_label     = "Air movement acceptability",
+  color_title = "Air speed",
+  x_breaks    = x_temp_scale$breaks,
+  x_limits    = x_temp_scale$limits
+)
+
+p_ama_speed <- plot_acc_scatter(
+  am_scatter_acc, "v_air_m_s", "session_sat", session_sat_palette,
+  x_label     = "Ankle air speed (m/s)",
+  y_label     = "Air movement acceptability",
+  color_title = "Supply temp.",
+  x_breaks    = x_speed_scale$breaks,
+  x_limits    = x_speed_scale$limits
+)
+
+am_acc_scatter_p <-
+  (p_ama_temp | (p_ama_speed + no_y_theme)) +
+  plot_layout() +
+  patchwork_theme[[1]] &
+  patchwork_theme[[2]]
+
+ggsave(
+  here::here("manuscript", "figs", "air_movement_acceptability_ankles.png"),
+  plot   = am_acc_scatter_p,
+  dpi    = 500,
+  width  = double_col_width,
+  height = 80,
+  units  = "mm",
+  bg     = "transparent"
+)
+
+# LM stats table (for text references) ----------------------------------------
+
+lm_stats_d <- dplyr::bind_rows(
+  bind_lm(compute_lm_stats(ts_scatter_overall, "t_supply_c", "response_value_num", "workstation"),
+          "thermal_sensation_overall",    "t_supply_c"),
+  bind_lm(compute_lm_stats(ts_scatter_overall, "v_air_m_s",  "response_value_num", "session_sat"),
+          "thermal_sensation_overall",    "v_air_m_s"),
+  bind_lm(compute_lm_stats(ts_scatter_ankles,  "t_supply_c", "response_value_num", "workstation"),
+          "thermal_sensation_ankles",     "t_supply_c"),
+  bind_lm(compute_lm_stats(ts_scatter_ankles,  "v_air_m_s",  "response_value_num", "session_sat"),
+          "thermal_sensation_ankles",     "v_air_m_s"),
+  bind_lm(compute_lm_stats(ta_scatter_overall, "t_supply_c", "response_plot",      "workstation"),
+          "thermal_acceptability_overall","t_supply_c"),
+  bind_lm(compute_lm_stats(ta_scatter_overall, "v_air_m_s",  "response_plot",      "session_sat"),
+          "thermal_acceptability_overall","v_air_m_s"),
+  bind_lm(compute_lm_stats(am_scatter_acc,     "t_supply_c", "response_plot",      "workstation"),
+          "air_movement_acceptability",   "t_supply_c"),
+  bind_lm(compute_lm_stats(am_scatter_acc,     "v_air_m_s",  "response_plot",      "session_sat"),
+          "air_movement_acceptability",   "v_air_m_s")
 )
 
 

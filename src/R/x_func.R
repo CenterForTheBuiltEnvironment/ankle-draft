@@ -322,6 +322,167 @@ plot_pairedwilcox <- function(data, outcome_var, posthoc_result,
   return(p)
 }
 
+# Scatter + LM Plot Functions ==================================================
+
+#' Compute per-group LM slope, intercept, and R² (saved to CSV; not plotted)
+compute_lm_stats <- function(data, x_var, y_var, color_var) {
+  data %>%
+    dplyr::group_by(.data[[color_var]]) %>%
+    dplyr::group_modify(~ {
+      fit <- lm(reformulate(x_var, y_var), data = .x)
+      tibble::tibble(
+        slope     = coef(fit)[[2]],
+        intercept = coef(fit)[[1]],
+        r2        = summary(fit)$r.squared
+      )
+    }) %>%
+    dplyr::ungroup()
+}
+
+bind_lm <- function(r2_obj, outcome, x_var) {
+  group_col <- setdiff(names(r2_obj), c("slope", "intercept", "r2"))
+  r2_obj %>%
+    dplyr::mutate(dplyr::across(dplyr::all_of(group_col), as.character)) %>%
+    dplyr::rename(group = dplyr::all_of(group_col)) %>%
+    dplyr::mutate(outcome = outcome, x_var = x_var, group_var = group_col) %>%
+    dplyr::select(outcome, x_var, group_var, group, slope, intercept, r2)
+}
+
+format_r2 <- function(data, x_var, y_var, color_var, level_order) {
+  compute_lm_stats(data, x_var, y_var, color_var) %>%
+    dplyr::arrange(factor(.data[[color_var]], levels = level_order)) %>%
+    dplyr::pull(r2) %>%
+    sprintf("%.2f", .) %>%
+    paste(collapse = "  |  ") %>%
+    paste0("R²: ", .)
+}
+
+#' Generic scatter + LM panel (full y-scale enforced by limits; inside legend)
+plot_scatter_lm <- function(data, x_var, y_var, color_var, palette,
+                            x_label, y_label, y_breaks, y_labels,
+                            color_title, x_breaks = NULL, x_limits = NULL) {
+  r2_sub <- format_r2(data, x_var, y_var, color_var, names(palette))
+  ggplot(data, aes(x = .data[[x_var]], y = .data[[y_var]],
+                   color = .data[[color_var]])) +
+    geom_jitter(alpha = 0.35, size = 0.8, width = 0.05) +
+    geom_smooth(
+      aes(fill = .data[[color_var]]),
+      method    = "lm",
+      formula   = y ~ x,
+      se        = TRUE,
+      alpha     = 0.15,
+      linewidth = 0.7
+    ) +
+    scale_color_manual(values = palette, name = color_title) +
+    scale_fill_manual(values = palette, guide = "none") +
+    scale_x_continuous(breaks = x_breaks, limits = x_limits) +
+    scale_y_continuous(
+      breaks = y_breaks,
+      labels = y_labels,
+      limits = c(min(y_breaks), max(y_breaks)),
+      expand = expansion(add = 0.15)
+    ) +
+    guides(color = guide_legend(nrow = 1, override.aes = list(alpha = 1, size = 2, fill = NA, linetype = 0))) +
+    labs(x = x_label, y = y_label, subtitle = r2_sub) +
+    theme_minimal(base_size = 7) +
+    theme(
+      panel.grid.major     = element_blank(),
+      panel.grid.minor     = element_blank(),
+      axis.ticks.y         = element_line(color = "grey", linewidth = 0.25),
+      axis.ticks.x         = element_line(color = "grey", linewidth = 0.25),
+      axis.ticks.length    = unit(1, "mm"),
+      axis.title.x         = element_text(margin = margin(t = 6)),
+      legend.position      = "top",
+      legend.direction     = "horizontal",
+      legend.title         = element_text(size = 6),
+      legend.text          = element_text(size = 6),
+      legend.key.size      = unit(3, "mm"),
+      legend.key           = element_blank(),
+      plot.subtitle        = element_text(size = 5, hjust = 0.5, color = "grey40",
+                                          margin = margin(t = 0, b = 1, unit = "mm"))
+    )
+}
+
+#' Acceptability scatter + LM panel (top legend; y-axis trimmed to label range)
+plot_acc_scatter <- function(data, x_var, color_var, palette,
+                             x_label, y_label, color_title,
+                             x_breaks = NULL, x_limits = NULL) {
+  r2_sub <- format_r2(data, x_var, "response_plot", color_var, names(palette))
+  ggplot(data, aes(x = .data[[x_var]], y = response_plot,
+                   color = .data[[color_var]])) +
+    annotate("rect", xmin = -Inf, xmax = Inf,
+             ymin = 0.1 + vertical_gap, ymax = Inf,
+             fill = "#c1e0b9", alpha = 0.2) +
+    annotate("rect", xmin = -Inf, xmax = Inf,
+             ymin = -Inf, ymax = -0.1,
+             fill = "#d99fa8", alpha = 0.2) +
+    annotate("rect", xmin = -Inf, xmax = Inf,
+             ymin = -0.1, ymax = 0.1 + vertical_gap,
+             fill = "white") +
+    geom_hline(yintercept =  0.1 + vertical_gap,
+               linetype = "dashed", color = "grey50", linewidth = 0.3) +
+    geom_hline(yintercept = -0.1,
+               linetype = "dashed", color = "grey50", linewidth = 0.3) +
+    geom_jitter(alpha = 0.35, size = 0.8, width = 0.05) +
+    geom_smooth(
+      aes(fill = .data[[color_var]]),
+      method    = "lm",
+      formula   = y ~ x,
+      se        = TRUE,
+      alpha     = 0.15,
+      linewidth = 0.7
+    ) +
+    scale_color_manual(values = palette, name = color_title) +
+    scale_fill_manual(values = palette, guide = "none") +
+    scale_x_continuous(breaks = x_breaks, limits = x_limits) +
+    scale_y_continuous(
+      breaks = c(-3, -2, -1, -0.1,
+                 0.1 + vertical_gap, 1 + vertical_gap,
+                 2 + vertical_gap, 3 + vertical_gap),
+      labels = c("Clearly unacceptable", "", "Just unacceptable", "",
+                 "Just acceptable", "", "", "Clearly acceptable"),
+      limits = c(-3, 3 + vertical_gap),
+      expand = expansion(add = 0)
+    ) +
+    guides(color = guide_legend(nrow = 1, override.aes = list(alpha = 1, size = 2, fill = NA, linetype = 0))) +
+    labs(x = x_label, y = y_label, subtitle = r2_sub) +
+    theme_minimal(base_size = 7) +
+    theme(
+      panel.grid.major  = element_blank(),
+      panel.grid.minor  = element_blank(),
+      axis.ticks.y      = element_line(color = "grey", linewidth = 0.25),
+      axis.ticks.x      = element_line(color = "grey", linewidth = 0.25),
+      axis.ticks.length = unit(1, "mm"),
+      axis.title.x      = element_text(margin = margin(t = 6)),
+      legend.position   = "top",
+      legend.direction  = "horizontal",
+      legend.title      = element_text(size = 6),
+      legend.text       = element_text(size = 6),
+      legend.key.size   = unit(3, "mm"),
+      legend.key        = element_blank(),
+      plot.subtitle     = element_text(size = 5, hjust = 0.5, color = "grey40",
+                                       margin = margin(t = 0, b = 1, unit = "mm"))
+    )
+}
+
+# Shared helpers for patchwork scatter figures
+no_y_theme <- theme(
+  axis.text.y  = element_blank(),
+  axis.title.y = element_blank(),
+  axis.ticks.y = element_blank()
+)
+
+patchwork_theme <- list(
+  plot_annotation(tag_levels = "a", tag_suffix = "."),
+  theme(
+    plot.tag      = element_text(size = 7, face = "bold"),
+    plot.margin   = margin(b = 5, unit = "mm"),
+    axis.title    = element_text(margin = margin(r = 2, unit = "mm")),
+    legend.margin = margin(l = 3, unit = "mm")
+  )
+)
+
+
 plot_draft_model <- function(data, label, subtitle_text){
   
   ppd_levels <- c(10,20,40,60,80)

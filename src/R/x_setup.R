@@ -90,8 +90,6 @@ acceptability_palette <- c(
   "#bc3e4d", "#d99fa8", "#f3e8e7", "#c1e0b9", "#38a257"
 )
 
-session_type_palette <- c("#FFBE0B", "#FB5607", "#FF006E", "#8338EC")
-
 workstation_palette <- c(
   "low" = "#c9e0b0",
   "medium" = "#b8e4f7",
@@ -99,3 +97,14 @@ workstation_palette <- c(
 )
 
 model_comparison <- c("#82c6ed", "#eb6b58")
+
+session_sat_palette <- c(
+  "15C" = "#A388FF",
+  "17C" = "#FFA372",
+  "19C" = "#FF7EB6"
+)
+
+vertical_gap <- 0.2   # visual gap between acceptable/unacceptable regions
+
+x_temp_scale  <- list(limits = c(17, NA), breaks = seq(17, 21, 1))
+x_speed_scale <- list(limits = c(0, 0.8),  breaks = seq(0, 0.8, 0.2))
