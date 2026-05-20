@@ -144,9 +144,9 @@ plot_timecourse_mean_sd <- function(data, y_lab) {
       tsk_site ~ session_type,
       labeller = ggplot2::labeller(
         session_type = c(
-          yosemite = "15C",
-          yellowstone = "17C",
-          sequoia = "19C"
+          yosemite = "17-18°C",
+          yellowstone = "18-19°C",
+          sequoia = "19-20°C"
         )
       )
     ) +

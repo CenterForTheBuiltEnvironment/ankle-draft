@@ -426,7 +426,6 @@ years.
 ```{r}
 #| label: tbl-env
 #| tbl-cap: "Summary of environmental measurements."
-
 knitr::kable(env_airflow_t,
              col.names = c('Measurement', '15°C', '17°C', '19°C')
 )
@@ -434,25 +433,31 @@ knitr::kable(env_airflow_t,
 
 @tbl-env provides an overview of the measured environmental conditions.
 Across all three sessions, head-level air temperature remained stable at
-`r env_airflow_t %>% dplyr::filter(measurement == "Air temperature, head level (°C)") %>% dplyr::pull("15C")`
+`r env_airflow_t %>% dplyr::filter(measurement == "Air temperature, head level (°C)") %>% dplyr::pull("17-18°C")`
 °C,
-`r env_airflow_t %>% dplyr::filter(measurement == "Air temperature, head level (°C)") %>% dplyr::pull("17C")`
+`r env_airflow_t %>% dplyr::filter(measurement == "Air temperature, head level (°C)") %>% dplyr::pull("18-19°C")`
 °C, and
-`r env_airflow_t %>% dplyr::filter(measurement == "Air temperature, head level (°C)") %>% dplyr::pull("19C")`
+`r env_airflow_t %>% dplyr::filter(measurement == "Air temperature, head level (°C)") %>% dplyr::pull("19-20°C")`
 °C, and relative humidity was comparable across sessions, confirming
 stable background thermal conditions and establishing baseline in line
 with the PMV target level of \~ -0.5 (slightly cool).
 
 As the primary experimental manipulation, we set supply air temperatures
-to 15°C, 17°C, and 19°C to simulate the effect of window downdraft.
-Ankle-level temperatures were slightly higher than the supply
-temperature due to mixing with the warmer ambient air, but remained
-stable across all sessions. Within each session, we exposed subjects to
-three airspeed levels at separate workstations. We measured consistent
-air speeds across all three workstations and sessions, confirming
-reliable reproduction of the low, medium, and high airspeed conditions.
-Turbulence intensities remained low to medium throughout, indicating
-stable and controlled airflow [@fangerAirTurbulenceSensation1988].
+to 15°C, 17°C, and 19°C to simulate the effect of window downdraft. As
+shown in @tbl-env, ankle-level air temperatures, measured by the
+hot-wire anemometer at 0.1 m, were consistently higher than the supply
+setpoints due to mixing with the warmer ambient air, and reached ranges
+of approximately 17–18°C, 18–19°C, and 19–20°C for the three conditions
+respectively. Because the ankle-level temperature is the quantity
+relevant to thermal comfort and to the draft risk model, all subsequent
+analyses use the measured ankle-level air temperature rather than the
+supply setpoint as the experimental grouping variable. Within each
+session, we then exposed subjects to three airspeed levels at separate
+workstations. We measured consistent air speeds across all three
+workstations and sessions, confirming reliable reproduction of the low,
+medium, and high airspeed conditions. Turbulence intensities remained
+low to medium throughout, indicating stable and controlled airflow
+[@fangerAirTurbulenceSensation1988].
 
 ## Whole body thermal perception
 
@@ -495,27 +500,29 @@ preference_warmer <- thermal_preference_overall_summary %>%
 @fig-thermal-sensation-overall shows whole-body thermal sensation votes
 plotted against ankle air temperature and air speed. Votes ranged
 predominantly from Cool to Slightly warm across conditions. Thermal
-sensation increased with supply air temperature in all air speed groups,
-with steeper slopes at medium and high air speeds (b ≈
+sensation increased with ankle-level air temperature in all air speed
+groups, with steeper slopes at medium and high air speeds (b ≈
 `r round(min(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_overall", x_var == "t_supply_c", group %in% c("medium", "high")) |> dplyr::pull(slope)), 2)`
 –
 `r round(max(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_overall", x_var == "t_supply_c", group %in% c("medium", "high")) |> dplyr::pull(slope)), 2)`
 per °C) than at low air speed (b ≈
 `r round(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_overall", x_var == "t_supply_c", group == "low") |> dplyr::pull(slope), 2)`
-per °C); however, supply temperature explained limited variance across
-all groups (R² ≤
+per °C); however, ankle-level air temperature explained limited variance
+across all groups (R² ≤
 `r round(max(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_overall", x_var == "t_supply_c") |> dplyr::pull(r2)), 2)`).
 No systematic relationship was observed between whole-body thermal
 sensation and ankle air speed, consistent with ankle-level airflow
 having limited influence on whole-body thermal perception (see
 Supplementary Information for response distributions).
 
+<!-- FLAG: "supply temperature" changed to "ankle-level air temperature" in figure caption -->
+
 ![Whole-body thermal sensation votes plotted against ankle air
 temperature (a) and air speed (b), with per-group linear regression
 lines and 95% confidence bands. Sensations were predominantly in the
-Cool to Slightly warm range; supply temperature showed a modest positive
-association at medium and high air speeds, while no clear relationship
-with air speed was
+Cool to Slightly warm range; ankle-level air temperature showed a modest
+positive association at medium and high air speeds, while no clear
+relationship with air speed was
 observed.](figs/thermal_sensation_overall.png){#fig-thermal-sensation-overall
 width="100%"}
 
@@ -553,7 +560,7 @@ acceptability_by_sat <- thermal_acceptability_summary %>%
 acceptability plotted against ankle air temperature and air speed.
 Responses were predominantly on the acceptable side of the scale across
 all conditions. No strong linear relationship was found between thermal
-acceptability and either supply temperature or air speed (R² ≤
+acceptability and either ankle-level air temperature or air speed (R² ≤
 `r round(max(lm_stats_d |> dplyr::filter(outcome == "thermal_acceptability_overall") |> dplyr::pull(r2)), 3)`
 in all groups), indicating that the range of conditions tested did not
 substantially compromise whole-body thermal comfort (see Supplementary
@@ -601,34 +608,34 @@ ankle_preference_warmer <- thermal_preference_ankle_summary %>%
 
 @fig-thermal-sensation-ankle presents ankle-level thermal sensation
 votes plotted against ankle air temperature and air speed. Sensations at
-the ankles were generally cooler than whole-body ratings. Supply
-temperature showed a positive association with ankle sensation across
-all air speed groups (b ≈
+the ankles were generally cooler than whole-body ratings. Ankle-level
+air temperature showed a positive association with ankle sensation
+across all air speed groups (b ≈
 `r round(min(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_ankles", x_var == "t_supply_c") |> dplyr::pull(slope)), 2)`
 –
 `r round(max(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_ankles", x_var == "t_supply_c") |> dplyr::pull(slope)), 2)`
 per °C), consistent with whole-body results. The relationship with ankle
-air speed was negative across all supply temperatures and strongest at
-15°C (b =
-`r round(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_ankles", x_var == "v_air_m_s", group == "15C") |> dplyr::pull(slope), 2)`,
+air speed was negative across all ankle-level air temperature conditions
+and strongest at 17–18°C (b =
+`r round(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_ankles", x_var == "v_air_m_s", group == "17-18°C") |> dplyr::pull(slope), 2)`,
 R² =
-`r round(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_ankles", x_var == "v_air_m_s", group == "15C") |> dplyr::pull(r2), 2)`),
+`r round(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_ankles", x_var == "v_air_m_s", group == "17-18°C") |> dplyr::pull(r2), 2)`),
 indicating that higher air speeds increased local cool sensations most
-noticeably at the coldest supply temperature. The association was weaker
-at 17°C and 19°C (b ≈
-`r round(max(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_ankles", x_var == "v_air_m_s", group %in% c("17C", "19C")) |> dplyr::pull(slope)), 2)`
+noticeably at the coolest ankle-level air temperature. The association
+was weaker at 18–19°C and 19–20°C (b ≈
+`r round(max(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_ankles", x_var == "v_air_m_s", group %in% c("18-19°C", "19-20°C")) |> dplyr::pull(slope)), 2)`
 to
-`r round(min(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_ankles", x_var == "v_air_m_s", group %in% c("17C", "19C")) |> dplyr::pull(slope)), 2)`,
+`r round(min(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_ankles", x_var == "v_air_m_s", group %in% c("18-19°C", "19-20°C")) |> dplyr::pull(slope)), 2)`,
 R² ≤
-`r round(max(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_ankles", x_var == "v_air_m_s", group %in% c("17C", "19C")) |> dplyr::pull(r2)), 2)`)
+`r round(max(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_ankles", x_var == "v_air_m_s", group %in% c("18-19°C", "19-20°C")) |> dplyr::pull(r2)), 2)`)
 (see Supplementary Information for response distributions).
 
 ![Ankle-level thermal sensation votes plotted against ankle air
 temperature (a) and air speed (b), with per-group linear regression
 lines and 95% confidence bands. Ankle sensations were generally cooler
 than whole-body ratings; the strongest negative association with air
-speed was observed at the 15°C supply
-temperature.](figs/thermal_sensation_ankle.png){#fig-thermal-sensation-ankle
+speed was observed at the lowest ankle-level air temperature condition
+(17–18°C).](figs/thermal_sensation_ankle.png){#fig-thermal-sensation-ankle
 width="100%"}
 
 ```{r}
@@ -658,15 +665,16 @@ air_pref_no_change <- air_movement_preference_summary %>%
 ### Air movement perception
 
 @fig-air-move-acceptability shows air movement acceptability at the
-ankle level plotted against supply temperature and air speed. Despite
-the localized cooling, responses were predominantly on the acceptable
-side of the scale. Air movement acceptability showed a consistent
-negative association with air speed across all supply temperatures (b ≈
+ankle level plotted against ankle-level air temperature and air speed.
+Despite the localized cooling, responses were predominantly on the
+acceptable side of the scale. Air movement acceptability showed a
+consistent negative association with air speed across all ankle-level
+air temperature conditions (b ≈
 `r round(max(lm_stats_d |> dplyr::filter(outcome == "air_movement_acceptability", x_var == "v_air_m_s") |> dplyr::pull(slope)), 2)`
 to
 `r round(min(lm_stats_d |> dplyr::filter(outcome == "air_movement_acceptability", x_var == "v_air_m_s") |> dplyr::pull(slope)), 2)`
-per m/s), while the relationship with supply temperature was negligible
-for the low and high air speed groups (b ≈
+per m/s), while the relationship with ankle-level air temperature was
+negligible for the low and high air speed groups (b ≈
 `r round(mean(lm_stats_d |> dplyr::filter(outcome == "air_movement_acceptability", x_var == "t_supply_c", group %in% c("low", "high")) |> dplyr::pull(slope)), 2)`)
 and modest for the medium group (b ≈
 `r round(lm_stats_d |> dplyr::filter(outcome == "air_movement_acceptability", x_var == "t_supply_c", group == "medium") |> dplyr::pull(slope), 2)`).
@@ -680,8 +688,8 @@ indicating substantial individual variability in acceptability ratings
 temperature (a) and air speed (b), with per-group linear regression
 lines and 95% confidence bands. Acceptability was predominantly
 positive; a consistent negative association with air speed was observed
-across all supply
-temperatures.](figs/air_movement_acceptability_ankles.png){#fig-air-move-acceptability
+across all ankle-level air temperature
+conditions.](figs/air_movement_acceptability_ankles.png){#fig-air-move-acceptability
 width="100%"}
 
 ### Skin temperature
@@ -748,12 +756,12 @@ with final reductions ranging from `r tsk_delta_last1_range$min_val`°C
 to `r tsk_delta_last1_range$max_val`°C. In general, the magnitude of
 this skin temperature reduction increased with air speed, as medium and
 high air speeds produced greater local cooling than low air speed across
-all three supply air temperatures.
+all three ankle-level air temperature conditions.
 
 Statistical analysis using BH correction confirmed that the cooling
 differences between low and medium air speeds, as well as between low
-and high air speeds, were significant at all supply temperatures
-(`r format_p_threshold(tsk_delta_sig_low_med_max_p)` and
+and high air speeds, were significant at all ankle-level air temperature
+conditions (`r format_p_threshold(tsk_delta_sig_low_med_max_p)` and
 `r format_p_threshold(tsk_delta_sig_low_high_max_p)`, respectively). In
 contrast, the difference between medium and high air speeds reached
 significance only at `r tsk_delta_sig_med_high`
@@ -797,17 +805,19 @@ liu_max_diff_speed <- liu_diff_by_speed %>% dplyr::slice(1) %>% dplyr::pull(sess
 liu_min_diff_speed <- liu_diff_by_speed %>% dplyr::slice(n()) %>% dplyr::pull(session_air_flow)
 ```
 
+<!-- FLAG: hardcoded "15°C", "17°C", "19°C" ankle temperature references updated to measured ranges; verify these index positions (res$diff[1], [3], [9]) still align with the correct conditions after any data reordering -->
+
 @fig-model-comp(a) compares the dissatisfaction rates predicted by the
 Liu model against our experimental observations. Across all conditions,
 the existing model consistently overpredicted local thermal
-dissatisfaction. At a 15°C ankle temperature, the discrepancy between
+dissatisfaction. At a 17–18°C ankle temperature, the discrepancy between
 predicted and observed rates widened as air speed increased: the model
 overpredicted dissatisfaction by `r res$diff[1]` percentage points (pp),
 rising to `r res$diff[3]` pp at high flow (0.6 m/s).
 
-We observed similar trends at 17°C and 19°C. Notably, for the 19°C
-condition at high air speed (0.6 m/s), the model predicted a PPD of
-`r res$ppd_liu_mean[9]`%, while the actual dissatisfied rate was only
+We observed similar trends at 18–19°C and 19–20°C. Notably, for the
+19–20°C condition at high air speed (0.6 m/s), the model predicted a PPD
+of `r res$ppd_liu_mean[9]`%, while the actual dissatisfied rate was only
 `r res$dissatisfied_rate[9]`%, resulting in a mean overestimation of
 `r res$diff[9]` pp. Across all experimental sessions, the model
 overpredicted dissatisfaction by an average of `r round(mean(res$diff))`
@@ -1053,9 +1063,9 @@ The limited variance explained by the linear regression models in
 @fig-thermal-sensation-ankle and @fig-air-move-acceptability further
 supports this interpretation. Across all conditions, R² values did not
 exceed `r round(max(lm_stats_d$r2), 2)`, with the strongest association
-observed for ankle-level thermal sensation versus air speed at 15°C (R²
-=
-`r round(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_ankles", x_var == "v_air_m_s", group == "15C") |> dplyr::pull(r2), 2)`).
+observed for ankle-level thermal sensation versus air speed at 17–18°C
+(R² =
+`r round(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_ankles", x_var == "v_air_m_s", group == "17-18°C") |> dplyr::pull(r2), 2)`).
 @liuPredictedPercentageDissatisfied2017 reported an R² of 0.10 for ankle
 air movement acceptability versus air speed alone, and an adjusted R² of
 0.22 for a model including both whole-body thermal sensation and ankle
@@ -1094,29 +1104,31 @@ From a physiological perspective, the skin temperature results indicate
 that winter clothing attenuates, though does not eliminate, the local
 cooling effect of airflow. During the final steady-state period,
 significant reductions in ankle skin temperature occurred only at the
-coldest supply temperature (15°C), where medium and high air speeds
-produced lower skin temperatures than the low-speed condition. At 17°C
-and 19°C, variations in air speed did not yield significant differences
-in steady-state skin temperature, and no significant differences were
-observed between medium and high air speeds at any supply temperature.
-These findings suggest that detectable local cooling requires a
-sufficiently large environmental contrast.
+coolest ankle-level air temperature condition (17–18°C), where medium
+and high air speeds produced lower skin temperatures than the low-speed
+condition. At 18–19°C and 19–20°C, variations in air speed did not yield
+significant differences in steady-state skin temperature, and no
+significant differences were observed between medium and high air speeds
+at any ankle-level air temperature condition. These findings suggest
+that detectable local cooling requires a sufficiently large
+environmental contrast.
 
 Thermal sensation changes are more closely associated with rapid
 variations in skin temperature than with absolute values
 [@ChoiInvestigationHumanBody2012; @KenshaloCoolThresholds1968]. In this
 study, ankle $\Delta T_{\text{sk}}$ relative to the baseline adaptation
 period showed significant differences between low and medium/high air
-speed conditions across all supply temperatures (effect size
-$d \approx 0.6\text{-}0.9$). Consistent with this, local ankle thermal
-sensation at medium and high speeds was significantly lower than at low
-speed under the 15°C condition. However, air movement acceptability did
-not differ significantly across conditions, indicating that while air
-speed produced measurable shifts in skin temperature and local thermal
-sensation, the magnitude of these changes was insufficient to generate
-distinguishable differences in dissatisfaction within the tested range.
-From a heat transfer perspective, clothing coverage increases local
-thermal resistance and reduces convective and radiative heat exchange
+speed conditions across all ankle-level air temperature conditions
+(effect size $d \approx 0.6\text{-}0.9$). Consistent with this, local
+ankle thermal sensation at medium and high speeds was significantly
+lower than at low speed under the 17–18°C condition. However, air
+movement acceptability did not differ significantly across conditions,
+indicating that while air speed produced measurable shifts in skin
+temperature and local thermal sensation, the magnitude of these changes
+was insufficient to generate distinguishable differences in
+dissatisfaction within the tested range. From a heat transfer
+perspective, clothing coverage increases local thermal resistance and
+reduces convective and radiative heat exchange
 [@oguroEvaluationEffectAir2001; @nishiDirectMeasurementClothing1975],
 suppressing both the magnitude and variability of skin temperature
 changes and making it less likely that occupants cross discomfort
@@ -1318,25 +1330,27 @@ preference. These complement the scatter plots with linear regression
 lines presented in @sec-results in the main text.
 
 ![Whole-body thermal sensation (a) and thermal preference (b) votes by
-supply air temperature and air speed. Participants predominantly
-reported neutral to cool sensations, with cooler supply temperatures
-increasing the proportion preferring warmer
+ankle-level air temperature and air speed. Participants predominantly
+reported neutral to cool sensations, with lower ankle-level air
+temperatures increasing the proportion preferring warmer
 conditions.](figs/supp_thermal_perception_overall.png){#fig-supp-thermal-perception-overall
 width="75%"}
 
 ![Ankle-level thermal sensation (a) and thermal preference (b) votes by
-supply air temperature and air speed. Sensations were generally cooler
-at the ankles than whole-body ratings, with cooler supply temperatures
-and higher air speeds increasing cool sensations and the preference for
-warmer
+ankle-level air temperature and air speed. Sensations were generally
+cooler at the ankles than whole-body ratings, with lower ankle-level air
+temperatures and higher air speeds increasing cool sensations and the
+preference for warmer
 conditions.](figs/supp_thermal_perception_ankle.png){#fig-supp-thermal-perception-ankle
 width="75%"}
 
 ![Ankle-level air movement acceptability (a) and preference (b) votes by
-supply air temperature and air speed. Most participants found ankle air
-movement acceptable, though higher air speeds increased the preference
-for less air
+ankle-level air temperature and air speed. Most participants found ankle
+air movement acceptable, though higher air speeds increased the
+preference for less air
 movement.](figs/supp_air_movement_acc_pref.png){#fig-supp-air-movement-acc-pref
 width="75%"}
+
+# Appendix B: Typical clothing levels in US commercial buildings {.unnumbered}
 
 # References {.unnumbered}

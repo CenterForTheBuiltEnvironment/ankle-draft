@@ -44,7 +44,7 @@ sex_levels <- c("female", "male", "third gender / other")
 session_type_levels <- c("yosemite", "yellowstone", "sequoia")
 
 session_sat_levels <- c("15C", "17C", "19C")
-session_sat_labels <- c("15C", "17C", "19C")
+session_sat_labels <- c("17-18°C", "18-19°C", "19-20°C")
 
 workstation_levels <- c("adaptation", "ws02", "ws03", "ws01")
 workstation_labels <- c("adaptation", "low", "medium", "high")
@@ -99,9 +99,9 @@ workstation_palette <- c(
 model_comparison <- c("#82c6ed", "#eb6b58")
 
 session_sat_palette <- c(
-  "15C" = "#A388FF",
-  "17C" = "#FFA372",
-  "19C" = "#FF7EB6"
+  "17-18°C" = "#A388FF",
+  "18-19°C" = "#FFA372",
+  "19-20°C" = "#FF7EB6"
 )
 
 vertical_gap <- 0.2   # visual gap between acceptable/unacceptable regions

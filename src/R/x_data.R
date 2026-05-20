@@ -42,6 +42,11 @@ sessions <- read_csv(
     ),
     session_time_end = lubridate::mdy_hm(
       session_time_end, tz = "America/Los_Angeles"
+    ),
+    session_sat = factor(
+      as.character(session_sat),
+      levels = session_sat_levels,
+      labels = session_sat_labels
     )
   )
 

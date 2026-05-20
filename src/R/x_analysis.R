@@ -423,7 +423,7 @@ p_ts_speed <- plot_scatter_lm(
   y_label     = "Whole-body thermal sensation vote",
   y_breaks    = y_sensation$breaks,
   y_labels    = y_sensation$labels,
-  color_title = "Supply temp.",
+  color_title = "Ankle temp.",
   x_breaks    = x_speed_scale$breaks,
   x_limits    = x_speed_scale$limits
 )
@@ -541,7 +541,7 @@ p_ta_speed <- plot_acc_scatter(
   ta_scatter_overall, "v_air_m_s", "session_sat", session_sat_palette,
   x_label     = "Ankle air speed (m/s)",
   y_label     = "Thermal acceptability",
-  color_title = "Supply temp.",
+  color_title = "Ankle temp.",
   x_breaks    = x_speed_scale$breaks,
   x_limits    = x_speed_scale$limits
 )
@@ -657,7 +657,7 @@ p_tsa_speed <- plot_scatter_lm(
   y_label     = "Ankle-level thermal sensation vote",
   y_breaks    = y_sensation$breaks,
   y_labels    = y_sensation$labels,
-  color_title = "Supply temp.",
+  color_title = "Ankle temp.",
   x_breaks    = x_speed_scale$breaks,
   x_limits    = x_speed_scale$limits
 )
@@ -825,7 +825,7 @@ p_ama_speed <- plot_acc_scatter(
   am_scatter_acc, "v_air_m_s", "session_sat", session_sat_palette,
   x_label     = "Ankle air speed (m/s)",
   y_label     = "Air movement acceptability",
-  color_title = "Supply temp.",
+  color_title = "Ankle temp.",
   x_breaks    = x_speed_scale$breaks,
   x_limits    = x_speed_scale$limits
 )
