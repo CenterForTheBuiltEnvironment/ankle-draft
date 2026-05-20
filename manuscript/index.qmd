@@ -517,8 +517,8 @@ across all groups (R² ≤
 `r round(max(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_overall", x_var == "t_supply_c") |> dplyr::pull(r2)), 2)`).
 No systematic relationship was observed between whole-body thermal
 sensation and ankle air speed, consistent with ankle-level airflow
-having limited influence on whole-body thermal perception (see
-@sec-appendix-a.unnumbered for response distributions).
+having limited influence on whole-body thermal perception (see Appendix
+A for response distributions).
 
 ![Whole-body thermal sensation votes plotted against ankle air
 temperature (a) and air speed (b), with per-group linear regression
@@ -566,8 +566,8 @@ all conditions. No strong linear relationship was found between thermal
 acceptability and either ankle-level air temperature or air speed (R² ≤
 `r round(max(lm_stats_d |> dplyr::filter(outcome == "thermal_acceptability_overall") |> dplyr::pull(r2)), 3)`
 in all groups), indicating that the range of conditions tested did not
-substantially compromise whole-body thermal comfort (see
-@sec-appendix-a.unnumbered for response distributions).
+substantially compromise whole-body thermal comfort (see Appendix A for
+response distributions).
 
 ![Whole-body thermal acceptability votes plotted against ankle air
 temperature (a) and air speed (b), with per-group linear regression
@@ -631,7 +631,7 @@ to
 `r round(min(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_ankles", x_var == "v_air_m_s", group %in% c("18-19°C", "19-20°C")) |> dplyr::pull(slope)), 2)`,
 R² ≤
 `r round(max(lm_stats_d |> dplyr::filter(outcome == "thermal_sensation_ankles", x_var == "v_air_m_s", group %in% c("18-19°C", "19-20°C")) |> dplyr::pull(r2)), 2)`)
-(see @sec-appendix-a.unnumbered for response distributions).
+(see Appendix A for response distributions).
 
 ![Ankle-level thermal sensation votes plotted against ankle air
 temperature (a) and air speed (b), with per-group linear regression
@@ -685,7 +685,7 @@ Linear regression explained a small proportion of variance in all groups
 (R² ≤
 `r round(max(lm_stats_d |> dplyr::filter(outcome == "air_movement_acceptability") |> dplyr::pull(r2)), 3)`),
 indicating substantial individual variability in acceptability ratings
-(see @sec-appendix-a.unnumbered for response distributions).
+(see Appendix A for response distributions).
 
 ![Ankle-level air movement acceptability votes plotted against ankle air
 temperature (a) and air speed (b), with per-group linear regression
@@ -1328,7 +1328,7 @@ maintaining full accountability for the publication’s content.
 Schüco and the Center for the Built Environment at the University of
 California, Berkeley supported this research.
 
-# Appendix A: Response distributions {#sec-appendix-a.unnumbered}
+# Appendix A: Response distributions {#sec-appendix-a .unnumbered}
 
 The following figures show the full response distributions for thermal
 sensation, thermal preference, and air movement acceptability and
