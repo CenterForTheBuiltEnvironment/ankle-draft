@@ -71,9 +71,9 @@ shoes (\~0.75 clo). This study evaluated thermal comfort responses to
 ankle-level draft under such winter clothing conditions through
 controlled laboratory experiments with 51 participants. Using a
 within-subjects repeated-measures design, we exposed participants to
-nine conditions varying supply air temperature (15, 17, and 19°C) and
-ankle-level air speed (0.1–0.7 m/s) simulating window downdraft while
-they wore clothing ensembles targeting 0.75 clo.
+nine conditions varying ankle-level air temperature (17-20°C) and air
+speed (0.1–0.7 m/s) simulating window downdraft while they wore clothing
+ensembles targeting 0.75 clo.
 
 The existing ankle draft model systematically overpredicted
 dissatisfaction across all conditions. While prior studies with exposed
@@ -446,10 +446,10 @@ knitr::kable(demographic_d,
 
 ```
 
-\@tbl-demographics provides a summary of the demographic information
-collected from the study participants. Since the demographic data is not
-uniformly distributed, we use the median and interquartile range (IQR)
-to describe the dataset. A total of
+@tbl-demographics provides a summary of the demographic information
+collected from the study participants. Since the demographic data was
+not uniformly distributed, we use the median and interquartile range
+(IQR) to describe the dataset. A total of
 `r demographic_d %>% dplyr::filter(sex == "All") %>% dplyr::pull(n)`
 subjects participated in the study
 (`r demographic_d %>% dplyr::filter(sex == "Female") %>% dplyr::pull(n)`
@@ -492,9 +492,10 @@ analyses use the measured ankle-level air temperature rather than the
 supply setpoint as the experimental grouping variable. Within each
 session, we then exposed subjects to three airspeed levels at separate
 workstations. We measured consistent air speeds across all three
-workstations and sessions, confirming reliable reproduction of the low,
-medium, and high airspeed conditions. Turbulence intensities remained
-low to medium throughout, indicating stable and controlled airflow
+workstations and sessions, confirming reliable reproduction of the low
+(\~ 0.15 m/s), medium (\~ 0.4 m/s) and high (\~ 0.6 m/s) airspeed
+conditions. Turbulence intensities remained low to medium throughout,
+indicating stable and controlled airflow
 [@fangerAirTurbulenceSensation1988].
 
 ## Whole body thermal perception
