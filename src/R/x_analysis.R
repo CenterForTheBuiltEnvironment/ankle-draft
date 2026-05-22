@@ -873,7 +873,7 @@ lm_stats_d <- dplyr::bind_rows(
 
 dissatisfied_with_draft_ankles <- analysis %>%
   dplyr::filter(
-    question %in% c("thermal_sensation_ankles", "air_movement_acceptability_ankles", "dissatisfied_with_draft_ankles"),
+    question %in% c("thermal_sensation","thermal_sensation_ankles", "air_movement_acceptability_ankles", "dissatisfied_with_draft_ankles"),
     is_open_text == FALSE
   ) %>%
   dplyr::filter(workstation != "adaptation") %>%
@@ -881,6 +881,7 @@ dissatisfied_with_draft_ankles <- analysis %>%
   dplyr::group_by(session_sat,t_air_c, t_supply_c, v_air_m_s, session_id, 
                   subject_id, workstation) %>%
   dplyr::summarise(
+    thermal_sensation  = response_value[question == "thermal_sensation"],
     thermal_sensation_ankles  = response_value[question == "thermal_sensation_ankles"],
     air_movement_acceptability_ankles = response_value[question == "air_movement_acceptability_ankles"],
     dissatisfied_with_draft_ankles = response_value[question == "dissatisfied_with_draft_ankles"],
@@ -891,7 +892,7 @@ dissatisfied_with_draft_ankles <- analysis %>%
 
 dissatisfied_with_draft_ankles <- dissatisfied_with_draft_ankles %>%
   dplyr::mutate(
-    ppd_liu = plogis(-2.58 + 3.05 * v_air_m_s - 1.06 * thermal_sensation_ankles)
+    ppd_liu = plogis(-2.58 + 3.05 * v_air_m_s - 1.06 * thermal_sensation)
   )
 
 
@@ -1037,7 +1038,7 @@ Liumodel_calibrationcurve_obj <- valProbggplot(
   xlim = c(0.2, 1),
   ylim = c(0.1, 1),
   statloc = c(0.05, 0.85),
-  dostats = c("Intercept", "Slope", "C (ROC)", "Brier"),
+  dostats = FALSE,
   roundstats = 2,
   d0lab = "Satisfied",
   d1lab = "Dissatisfied",
@@ -1051,12 +1052,28 @@ Liumodel_calibrationcurve_obj <- valProbggplot(
 )
 
 liu_calibration_stats <- Liumodel_calibrationcurve_obj$stats
+liu_calibration_stats_label <- paste(
+  sprintf("Intercept: %.2f", liu_calibration_stats["Intercept"]),
+  sprintf("Slope: %.2f", liu_calibration_stats["Slope"]),
+  sprintf("AUC: %.2f", liu_calibration_stats["C (ROC)"]),
+  sprintf("Brier: %.2f", liu_calibration_stats["Brier"]),
+  sep = "\n"
+)
 
 # Apply compatible theme
 axis_grey <- "gray90"
 
 Liumodel_calibrationcurve <- Liumodel_calibrationcurve_obj$ggPlot +
-  geom_line(lineend = "round", linejoin = "round") + 
+  geom_line(lineend = "round", linejoin = "round") +
+  annotate(
+    "text",
+    x = 0.05,
+    y = 0.85,
+    label = liu_calibration_stats_label,
+    hjust = 0,
+    vjust = 1,
+    size = 2.2
+  ) +
   theme_minimal(base_size = 7) + 
   coord_cartesian(xlim = c(0, 1), ylim = c(-0.15, 1), clip = "on") +
   scale_x_continuous(
@@ -1105,8 +1122,8 @@ ggsave(
 
 # Combined figure
 
-model_performance_p <- (model_error_p | Liumodel_calibrationcurve) +
-  plot_layout(widths = c(2, 1)) +
+model_performance_p <- (Liumodel_calibrationcurve | model_error_p) +
+  plot_layout(widths = c(1.5, 1)) +
   plot_annotation(tag_levels = "a", tag_suffix = ".") &
   theme(
     plot.subtitle    = element_text(hjust = 0.05, margin = margin(b = 3, unit = "mm")),
@@ -1160,8 +1177,13 @@ new_model <- analysis_all %>%
       source == "liu",
       as.integer(thermal_sensation_ankles < 0 & air_movement_acceptability < 0),
       dissatisfied_with_draft_ankles
+    ),
+    dissatisfied_with_draft_ankles_amp = dplyr::if_else(
+      source == "liu",
+      as.integer(air_movement_preference == -1 & thermal_sensation_ankles < 0),
+      dissatisfied_with_draft_ankles_amp
     )
-  ) %>%
+  )%>%
   dplyr::filter(!is.na(dissatisfied_with_draft_ankles),
                 !is.na(thermal_sensation))
 
@@ -1306,13 +1328,13 @@ p_exposed  <- plot_draft_model(plot_grid_exposed,"a.","Ankle Uncovered")
 p_unexposed <- plot_draft_model(plot_grid_unexposed,"b.","Ankle Covered")
 
 model_final <- p_exposed + p_unexposed +
-  plot_layout(ncol = 1)
+  plot_layout(ncol = 2)
 ggsave(
   here::here("manuscript", "figs", "Model.png"),
   plot = model_final,
   dpi = 500,
-  width = single_col_width,
-  height = 160,
+  width = double_col_width,
+  height = 90,
   units = "mm",
   bg = "transparent"
 )
@@ -1437,7 +1459,7 @@ tsk_last5_paired_ttest <- paired_t_test(
 
 # 3) Time course relative to pre-workstation thermal comfort baseline ----------
 
-# kin temperature was divided into the “formal experiment period” and the “adaptation period” 
+# Skin temperature was divided into the “formal experiment period” and the “adaptation period” 
 # based on the 0-20 min and 20-40 min intervals preceding the final response.
 # I also considered defining the “adaptation period” as the 20 min preceding the last response during adaptation. 
 # However, because response speed varied across participants, this introduced a small fluctuation in skin temperature 
@@ -1527,6 +1549,122 @@ tsk_timecourse_delta_p <- plot_timecourse_mean_sd(
   scale_x_continuous(breaks = seq(0, 20, by = 5), limits = c(0, 20)) +
   theme(legend.position = "none")
 
+# 5) Delta skin temperature estimation ----------------------------------------
+
+fit_delta_exponential <- function(data) {
+  fit_data <- data %>%
+    dplyr::filter(plot_time_min >= 0, is.finite(mean_value)) %>%
+    dplyr::select(plot_time_min, mean_value)
+
+  start_delta_inf <- min(fit_data$mean_value, na.rm = TRUE) - 0.2
+
+  fit <- try(
+    stats::nls(
+      mean_value ~ delta_inf * (1 - exp(-k * plot_time_min)),
+      data = fit_data,
+      start = list(delta_inf = start_delta_inf, k = 0.12),
+      algorithm = "port",
+      lower = c(delta_inf = -10, k = 0.001),
+      upper = c(delta_inf = 0, k = 2),
+      control = stats::nls.control(maxiter = 200, warnOnly = TRUE)
+    ),
+    silent = TRUE
+  )
+
+  if (inherits(fit, "try-error")) {
+    return(tibble::tibble(delta_inf = NA_real_, k = NA_real_, rmse = NA_real_, r2 = NA_real_))
+  }
+
+  pred <- stats::predict(fit)
+  sse <- sum((fit_data$mean_value - pred)^2)
+  sst <- sum((fit_data$mean_value - mean(fit_data$mean_value))^2)
+
+  tibble::tibble(
+    delta_inf = unname(stats::coef(fit)[["delta_inf"]]),
+    k = unname(stats::coef(fit)[["k"]]),
+    rmse = sqrt(mean((fit_data$mean_value - pred)^2)),
+    r2 = 1 - sse / sst
+  )
+}
+
+tsk_delta_exponential_fits <- tsk_timecourse_delta_summary %>%
+  dplyr::group_by(session_type, workstation, tsk_site) %>%
+  dplyr::group_modify(~fit_delta_exponential(.x)) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(
+    delta_20_min = delta_inf * (1 - exp(-k * 20)),
+    delta_90_min = delta_inf * (1 - exp(-k * 90)),
+    additional_delta_20_to_90 = delta_90_min - delta_20_min,
+    tau_min = 1 / k
+  )
+
+tsk_delta_exponential_predictions <- tsk_delta_exponential_fits %>%
+  dplyr::left_join(
+    tsk_timecourse_delta_summary %>%
+      dplyr::filter(plot_time_min >= 0, plot_time_min <= 20) %>%
+      dplyr::group_by(session_type, workstation, tsk_site) %>%
+      dplyr::slice_max(plot_time_min, n = 1, with_ties = FALSE) %>%
+      dplyr::ungroup() %>%
+      dplyr::select(session_type, workstation, tsk_site, observed_20_min = mean_value),
+    by = c("session_type", "workstation", "tsk_site")
+  ) %>%
+  tidyr::crossing(plot_time_min = seq(20, 90, by = 0.25)) %>%
+  dplyr::mutate(
+    model_20_min = delta_inf * (1 - exp(-k * 20)),
+    model_value = delta_inf * (1 - exp(-k * plot_time_min)),
+    mean_value = observed_20_min + model_value - model_20_min
+  )
+
+tsk_delta_extrapolation_p <- ggplot() +
+  geom_line(
+    data = tsk_timecourse_delta_summary %>%
+      dplyr::filter(plot_time_min >= 0),
+    aes(x = plot_time_min, y = mean_value, color = workstation),
+    linewidth = 0.6,
+    alpha = 0.85
+  ) +
+  geom_line(
+    data = tsk_delta_exponential_predictions,
+    aes(x = plot_time_min, y = mean_value, color = workstation),
+    linetype = "longdash",
+    linewidth = 0.8
+  ) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50", linewidth = 0.4) +
+  geom_vline(xintercept = 20, linetype = "dotted", color = "grey45", linewidth = 0.4) +
+  facet_grid(
+    . ~ session_type,
+    labeller = ggplot2::labeller(
+      session_type = c(
+        yosemite = "17-18°C",
+        yellowstone = "18-19°C",
+        sequoia = "19-20°C"
+      )
+    )
+  ) +
+  scale_color_manual(values = workstation_palette, drop = FALSE) +
+  scale_x_continuous(breaks = seq(0, 90, by = 15), limits = c(0, 90)) +
+  labs(
+    x = "Time (min)",
+    y = expression(Delta * "Skin temperature from baseline (" * degree * "C)"),
+    color = "Air speed"
+  ) +
+  theme_minimal(base_size = 7) +
+  theme(
+    panel.grid.minor = element_blank(),
+    legend.position = "top",
+    strip.text = element_text()
+  )
+
+ggsave(
+  here::here("manuscript", "figs", "tsk_delta_extrapolation_p.png"),
+  plot = tsk_delta_extrapolation_p,
+  dpi = 500,
+  width = double_col_width,
+  height = 70,
+  units = "mm",
+  bg = "transparent"
+)
+
 tsk_p <- (tsk_timecourse_p / tsk_timecourse_delta_p) +
   plot_annotation(tag_levels = "a", tag_suffix = ".") &
   theme(
@@ -1554,3 +1692,178 @@ rm(
   tsk_ankle, tsk_timecourse,
   baseline_values, tsk_timecourse_delta
 )
+
+
+
+
+
+
+# 7. Sensitivity analysis using air movement preference as the outcome ==========
+
+# Fit separate mixed-effects models for "Ankle exposed" and "Ankle unexposed" --------
+
+# 1. fit models
+m_glmm_exposed_amp <- glmer(
+  dissatisfied_with_draft_ankles_amp ~ v_air_m_s + thermal_sensation + (1 | subject_id),
+  data = new_model_c %>% filter(clothing_type == "short"),
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa")
+)
+
+m_glmm_unexposed_amp <- glmer(
+  dissatisfied_with_draft_ankles_amp ~ v_air_m_s + thermal_sensation + (1 | subject_id),
+  data = new_model_c %>% filter(clothing_type == "long"),
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa")
+)
+
+summary(m_glmm_exposed_amp)
+summary(m_glmm_unexposed_amp)
+
+# 2. extract coefficients
+fe_exposed_amp <- fixef(m_glmm_exposed_amp)
+a_exposed_amp <- unname(fe_exposed_amp["(Intercept)"])
+b_exposed_amp <- unname(fe_exposed_amp["v_air_m_s"])
+c_exposed_amp <- unname(fe_exposed_amp["thermal_sensation"])
+sd_b0_exposed_amp <- sqrt(as.numeric(VarCorr(m_glmm_exposed_amp)$subject_id[1, 1]))
+
+fe_unexposed_amp <- fixef(m_glmm_unexposed_amp)
+a_unexposed_amp <- unname(fe_unexposed_amp["(Intercept)"])
+b_unexposed_amp <- unname(fe_unexposed_amp["v_air_m_s"])
+c_unexposed_amp <- unname(fe_unexposed_amp["thermal_sensation"])
+sd_b0_unexposed_amp <- sqrt(as.numeric(VarCorr(m_glmm_unexposed_amp)$subject_id[1, 1]))
+
+# 3. common V-TS grid
+grid_base <- expand_grid(
+  V  = seq(0, 1, length.out = 100),
+  TS = seq(-3, 3, length.out = 100)
+)
+
+# 4. Monte Carlo marginal probs
+set.seed(1)
+K <- 10000
+b0_draw_exposed_amp  <- rnorm(K, mean = 0, sd = sd_b0_exposed_amp)
+b0_draw_unexposed_amp <- rnorm(K, mean = 0, sd = sd_b0_unexposed_amp)
+
+grid_exposed_amp <- grid_base %>%
+  mutate(
+    eta = a_exposed_amp + b_exposed_amp * (V - ctr_means["v_air_m_s"]) + c_exposed_amp * (TS - ctr_means["thermal_sensation"]),
+    p_marg = vapply(
+      eta,
+      function(e) mean(plogis(e + b0_draw_exposed_amp)),
+      numeric(1)
+    ),
+    p_marg_clip = pmin(pmax(p_marg, 1e-8), 1 - 1e-8),
+    logit_p = qlogis(p_marg_clip)
+  )
+
+grid_unexposed_amp <- grid_base %>%
+  mutate(
+    eta = a_unexposed_amp + b_unexposed_amp * (V - ctr_means["v_air_m_s"]) + c_unexposed_amp * (TS - ctr_means["thermal_sensation"]),
+    p_marg = vapply(
+      eta,
+      function(e) mean(plogis(e + b0_draw_unexposed_amp)),
+      numeric(1)
+    ),
+    p_marg_clip = pmin(pmax(p_marg, 1e-8), 1 - 1e-8),
+    logit_p = qlogis(p_marg_clip)
+  )
+
+# 5. Approximate closed-form equations
+m_approx_exposed_amp  <- lm(logit_p ~ V + TS, data = grid_exposed_amp)
+m_approx_unexposed_amp <- lm(logit_p ~ V + TS, data = grid_unexposed_amp)
+
+# 6. approximation accuracy output
+
+grid_exposed_amp <- grid_exposed_amp %>%
+  mutate(p_hat = plogis(predict(m_approx_exposed_amp, newdata = grid_exposed_amp)))
+
+rmse_exposed_amp <- sqrt(mean((grid_exposed_amp$p_hat - grid_exposed_amp$p_marg)^2))
+mae_exposed_amp  <- mean(abs(grid_exposed_amp$p_hat - grid_exposed_amp$p_marg))
+r2_exposed_amp   <- cor(grid_exposed_amp$p_hat, grid_exposed_amp$p_marg)^2
+
+c(RMSE_exposed_amp = rmse_exposed_amp, MAE_exposed_amp = mae_exposed_amp, R2_exposed_amp = r2_exposed_amp)
+
+grid_unexposed_amp <- grid_unexposed_amp %>%
+  mutate(p_hat = plogis(predict(m_approx_unexposed_amp, newdata = grid_unexposed_amp)))
+
+rmse_unexposed_amp <- sqrt(mean((grid_unexposed_amp$p_hat - grid_unexposed_amp$p_marg)^2))
+mae_unexposed_amp  <- mean(abs(grid_unexposed_amp$p_hat - grid_unexposed_amp$p_marg))
+r2_unexposed_amp   <- cor(grid_unexposed_amp$p_hat, grid_unexposed_amp$p_marg)^2
+
+c(RMSE_unexposed_amp = rmse_unexposed_amp, MAE_unexposed_amp = mae_unexposed_amp, R2_unexposed_amp = r2_unexposed_amp)
+
+
+# Visualization for two models--------------------------------------------------
+# 1. grids for plotting closed-form equations
+
+cf_exposed_amp <- coef(m_approx_exposed_amp)
+cf_unexposed_amp <- coef(m_approx_unexposed_amp)
+
+plot_grid_exposed_amp <- expand_grid(
+  TS = seq(-3, 3, length.out = 300),
+  V  = seq(0, 1, length.out = 300)
+) %>%
+  mutate(
+    eta = cf_exposed_amp[1] + cf_exposed_amp[2] * V + cf_exposed_amp[3] * TS,
+    PPD = 100 * plogis(eta)
+  )
+
+plot_grid_unexposed_amp <- expand_grid(
+  TS = seq(-3, 3, length.out = 300),
+  V  = seq(0, 1, length.out = 300)
+) %>%
+  mutate(
+    eta = cf_unexposed_amp[1] + cf_unexposed_amp[2] * V + cf_unexposed_amp[3] * TS,
+    PPD = 100 * plogis(eta)
+  )
+
+p_exposed_amp  <- plot_draft_model(
+  plot_grid_exposed_amp,
+  "a.",
+  "Ankle Uncovered",
+  stagger_labels = TRUE,
+  omit_label_levels = 10,
+  omit_contour_levels = 10
+)
+
+p_unexposed_amp <- plot_draft_model(
+  plot_grid_unexposed_amp,
+  "b.",
+  "Ankle Covered",
+  stagger_labels = TRUE,
+  omit_label_levels = 10,
+  omit_contour_levels = 10
+)
+
+model_final_amp <- p_exposed_amp + p_unexposed_amp +
+  plot_layout(ncol = 2)
+ggsave(
+  here::here("manuscript", "figs", "Model_amp.png"),
+  plot = model_final_amp,
+  dpi = 500,
+  width = double_col_width,
+  height = 90,
+  units = "mm",
+  bg = "transparent"
+)
+
+
+# 2. Save closed-form equations
+model_formula_amp <- tibble(
+  Model = c("exposed","unexposed"),
+  
+  Intercept = c(cf_exposed_amp[1], cf_unexposed_amp[1]),
+  V_coef    = c(cf_exposed_amp[2], cf_unexposed_amp[2]),
+  TS_coef   = c(cf_exposed_amp[3], cf_unexposed_amp[3]),
+  
+  RMSE = c(rmse_exposed_amp, rmse_unexposed_amp),
+  MAE  = c(mae_exposed_amp,  mae_unexposed_amp),
+  R2   = c(r2_exposed_amp,   r2_unexposed_amp)
+) %>%
+  mutate(
+    eta = sprintf("%.4f + %.4f*V + %.4f*TS",Intercept, V_coef, TS_coef),
+    logit_formula = paste0("logit(P) = ", eta),
+    probability_formula = paste0("P = exp(", eta, ")/(1 + exp(", eta, "))"
+    )
+  )

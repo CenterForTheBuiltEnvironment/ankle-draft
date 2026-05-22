@@ -463,17 +463,24 @@ derived_vars <- analysis_wide_temp %>%
       thermal_sensation_ankles < 0 &
         air_movement_acceptability_ankles < 0,
       1L, 0L
-    )
+    )) %>%
+  dplyr::mutate(
+    dissatisfied_with_draft_ankles_amp = dplyr::if_else(
+        air_movement_preference_ankles < 0 &
+        thermal_sensation_ankles < 0,
+      1L, 0L
+      )    
   ) %>%
   dplyr::select(
     session_id, session_date, session_sat, subject_id, sex, workstation,
     t_air_c, rh_percent, co2_ppm, v_air_m_s, t_supply_c,
     v_air_sd_m_s, turbulence_intensity, dynamic_range_pct,
-    dissatisfied_with_draft_ankles
+    dissatisfied_with_draft_ankles,dissatisfied_with_draft_ankles_amp
   ) %>%
   tidyr::pivot_longer(
     cols = c(
-      dissatisfied_with_draft_ankles
+      dissatisfied_with_draft_ankles,
+      dissatisfied_with_draft_ankles_amp
     ),
     names_to = "question",
     values_to = "response_value"
@@ -634,10 +641,12 @@ liu_processed <- liu_raw %>%
 
 # Recode response scales to match current study
 # thermal_preference: Liu uses 1,2,3 -> transform to -1,0,1
+# air_movement_preference: Liu uses 0,1,2 -> transform to -1,0,1
 liu_processed <- liu_processed %>%
   dplyr::mutate(
     response_value = dplyr::case_when(
       question == "thermal_preference" ~ response_value - 2,
+      question == "air_movement_preference" ~ response_value - 1,
       TRUE ~ response_value
     )
   )
