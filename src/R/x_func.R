@@ -132,13 +132,19 @@ plot_lmm <- function(dat, xterm, xlab, model) {
 #' @param data Summary data frame with `plot_time_min`, `mean_value`, and `sd_value`
 #' @param y_lab Y-axis label
 #' @return ggplot object
-plot_timecourse_mean_sd <- function(data, y_lab) {
-  ggplot(data, aes(x = plot_time_min, y = mean_value, color = workstation, fill = workstation)) +
-    geom_ribbon(
+plot_timecourse_mean_sd <- function(data, y_lab, show_ribbon = TRUE) {
+  p <- ggplot(data, aes(x = plot_time_min, y = mean_value, color = workstation, fill = workstation))
+
+  if (show_ribbon) {
+    p <- p +
+      geom_ribbon(
       aes(ymin = mean_value - sd_value, ymax = mean_value + sd_value),
       alpha = 0.15,
       linewidth = 0
-    ) +
+    )
+  }
+
+  p +
     geom_line(linewidth = 0.8) +
     facet_grid(
       tsk_site ~ session_type,
@@ -483,9 +489,9 @@ patchwork_theme <- list(
 )
 
 
-plot_draft_model <- function(data, label, subtitle_text){
+plot_draft_model <- function(data, label, subtitle_text, stagger_labels = FALSE, omit_label_levels = NULL, omit_contour_levels = NULL){
   
-  ppd_levels <- c(10,20,40,60,80)
+  ppd_levels <- setdiff(c(10,20,40,60,80), omit_contour_levels)
   
   z_mat <- xtabs(PPD ~ TS + V, data = data)
   contour_lines <- grDevices::contourLines(
@@ -521,6 +527,7 @@ plot_draft_model <- function(data, label, subtitle_text){
     tick_x <- target_line$x[idx_top]
     
     tibble::tibble(
+      level = level,
       tick_x = tick_x,
       text_x = tick_x,
       V = label_y,
@@ -534,6 +541,21 @@ plot_draft_model <- function(data, label, subtitle_text){
       value_label = paste0(level, "*\"%\"")
     )
   })
+
+  if (!is.null(omit_label_levels)) {
+    contour_labels <- contour_labels %>%
+      dplyr::filter(!level %in% omit_label_levels)
+  }
+
+  if (stagger_labels && nrow(contour_labels) > 1) {
+    contour_labels <- contour_labels %>%
+      dplyr::arrange(tick_x) %>%
+      dplyr::mutate(
+        close_to_previous = tick_x - dplyr::lag(tick_x, default = -Inf) < 0.45,
+        V = label_y + dplyr::if_else(close_to_previous, 0.035, 0)
+      ) %>%
+      dplyr::select(-close_to_previous)
+  }
   
   ggplot(data, aes(TS, V)) +
     
@@ -595,7 +617,8 @@ plot_draft_model <- function(data, label, subtitle_text){
         size=9
       ),
       axis.title.x = element_text(margin = margin(t= 3, unit = "mm")),
-      plot.margin = margin(t = 8, r = 3, b = 2, l = 6, unit = "mm")
+      axis.title.y.right = element_text(angle = 90, margin = margin(l = 3, unit = "mm")),
+      plot.margin = margin(t = ifelse(stagger_labels, 11, 8), r = 3, b = 2, l = 6, unit = "mm")
     ) +
     
     
