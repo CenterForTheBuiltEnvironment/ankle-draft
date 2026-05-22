@@ -350,24 +350,47 @@ $$
 
 ### Evaluation of the existing ankle draft model
 
+Applying the existing ankle draft model to the experimental data, we
+calculated the predicted probability of ankle draft dissatisfaction for
+each observation.
 
-Applying the existing ankle draft model to the experimental data, we calculated the predicted probability of ankle draft dissatisfaction for each observation. 
+Calibration was assessed by comparing predicted probabilities with
+observed outcomes using a calibration curve based on a logistic
+recalibration model, following @vancalster2016. The calibration curve
+assesses whether predicted probabilities agree with observed
+proportions. For example, among observations predicted to have 30%
+dissatisfaction rate, about 30% should actually be dissatisfied. The
+calibration intercept tells whether predictions are systematically too
+high or too low. The calibration slope tells whether predictions are too
+extreme or not extreme enough.
 
-Calibration was assessed by comparing predicted probabilities with observed outcomes using a calibration curve based on a logistic recalibration model, following @vancalster2016. The calibration curve assesses whether predicted probabilities agree with observed proportions. For example, among observations predicted to have 30% dissatisfaction rate, about 30% should actually be dissatisfied. The calibration intercept tells whether predictions are systematically too high or too low. The calibration slope tells whether predictions are too extreme or not extreme enough.
+Model discrimination was evaluated using the AUC (area under the ROC
+curve). The AUC can be interpreted as the probability that, for a
+randomly selected pair consisting of one dissatisfied and one satisfied
+participant, the model assigns a higher predicted risk to the
+dissatisfied participant. Following @hosmer_applied_2000, AUC values of
+0.70–0.80, 0.80–0.90, and ≥0.90 were interpreted as acceptable,
+excellent, and outstanding discrimination, respectively. Values below
+0.70 were considered to indicate less-than-acceptable discrimination,
+with 0.50 representing no discrimination.
 
-Model discrimination was evaluated using the AUC (area under the ROC curve). The AUC can be interpreted as the probability that, for a randomly selected pair consisting of one dissatisfied and one satisfied participant, the model assigns a higher predicted risk to the dissatisfied participant. Following @hosmer_applied_2000, AUC values of 0.70–0.80, 0.80–0.90, and ≥0.90 were interpreted as acceptable, excellent, and outstanding discrimination, respectively. Values below 0.70 were considered to indicate less-than-acceptable discrimination, with 0.50 representing no discrimination. 
-
-Overall predictive accuracy was assessed using the Brier score [@GLENNBrier1950]. For a binary outcome, it is the mean squared difference between the predicted probability and the observed outcome, where observed outcomes are ankle draft dissatisfaction (1) or satisfaction (0).A Brier score of 0 is perfect and 1 is very poor.
+Overall predictive accuracy was assessed using the Brier score
+[@GLENNBrier1950]. For a binary outcome, it is the mean squared
+difference between the predicted probability and the observed outcome,
+where observed outcomes are ankle draft dissatisfaction (1) or
+satisfaction (0).A Brier score of 0 is perfect and 1 is very poor.
 
 $$
 \mathrm{Brier\ score} = \frac{1}{N}\sum_{i=1}^{N}(p_i - y_i)^2,
 $$
 
-where $p_i$ is the predicted probability from the existing model for
-the $i$-th observation, and $y_i$ is the corresponding binary outcome
+where $p_i$ is the predicted probability from the existing model for the
+$i$-th observation, and $y_i$ is the corresponding binary outcome
 indicating ankle draft dissatisfaction (1) or satisfaction (0).
 
-In addition, predictions were averaged within each experimental condition and compared with the corresponding observed percentages of dissatisfaction to examine condition-specific prediction accuracy.
+In addition, predictions were averaged within each experimental
+condition and compared with the corresponding observed percentages of
+dissatisfaction to examine condition-specific prediction accuracy.
 
 ### Development of the new ankle draft model {#sec-method-new-model}
 
@@ -772,11 +795,11 @@ format_p_threshold <- function(p) {
 @fig-tsk illustrates the progression of ankle skin temperatures
 throughout the exposure period. Using the pre-exposure adaptation period
 as a baseline, ankle skin temperatures dropped under all conditions,
-with final changes ranging from `r tsk_delta_last1_range$min_val`°C
-to `r tsk_delta_last1_range$max_val`°C. In general, the magnitude of
-this skin temperature reduction increased with air speed, as medium and
-high air speeds produced greater local cooling than low air speed across
-all three supply air temperatures.
+with final changes ranging from `r tsk_delta_last1_range$min_val`°C to
+`r tsk_delta_last1_range$max_val`°C. In general, the magnitude of this
+skin temperature reduction increased with air speed, as medium and high
+air speeds produced greater local cooling than low air speed across all
+three supply air temperatures.
 
 Statistical analysis using BH correction confirmed that the cooling
 differences between low and medium air speeds, as well as between low
@@ -827,18 +850,30 @@ liu_min_diff_speed <- liu_diff_by_speed %>% dplyr::slice(n()) %>% dplyr::pull(se
 
 <!-- FLAG: hardcoded "15°C", "17°C", "19°C" ankle temperature references updated to measured ranges; verify these index positions (res$diff[1], [3], [9]) still align with the correct conditions after any data reordering -->
 
-For each observation, the predicted percentage of dissatisfaction with ankle draft was calculated using the existing ankle draft model based on ankle-level air speed and actual whole-body thermal sensation. The predicted values were then fitted against the observed binary outcome of ankle draft satisfaction/dissatisfaction using logistic regression. The resulting calibration curve is shown in @fig-model-comp(a). In a well-calibrated model, the calibration curve would be expected to closely follow the 45° ideal line. Although the Brier score of existing model is 0.14, the systematic deviation of the calibration curve from the ideal line indicates that the existing model consistently overestimated the probability of ankle draft dissatisfaction under winter conditions. In addtion, the existing model retained acceptable discriminative
-ability in the present dataset (AUC =
-`r sprintf("%.2f", liu_calibration_stats["C (ROC)"])`) [@hosmer_applied_2000]. 
+For each observation, the predicted percentage of dissatisfaction with
+ankle draft was calculated using the existing ankle draft model based on
+ankle-level air speed and actual whole-body thermal sensation. The
+predicted values were then fitted against the observed binary outcome of
+ankle draft satisfaction/dissatisfaction using logistic regression. The
+resulting calibration curve is shown in @fig-model-comp(a). In a
+well-calibrated model, the calibration curve would be expected to
+closely follow the 45° ideal line. Although the Brier score of existing
+model is 0.14, the systematic deviation of the calibration curve from
+the ideal line indicates that the existing model consistently
+overestimated the probability of ankle draft dissatisfaction under
+winter conditions. In addtion, the existing model retained acceptable
+discriminative ability in the present dataset (AUC =
+`r sprintf("%.2f", liu_calibration_stats["C (ROC)"])`)
+[@hosmer_applied_2000].
 
 @fig-model-comp(b) compares the dissatisfaction rates predicted by the
 existing model against our experimental observations under each
 experimental condition. Across all conditions, the existing model
 consistently overpredicted local thermal dissatisfaction. At a 17–18°C
-ankle-level air temperature, the discrepancy between predicted and observed rates
-widened as air speed increased: the model overpredicted dissatisfaction
-by `r res$diff[1]`%, rising to `r res$diff[3]`%
-at high flow (0.6 m/s). We observed similar trends at 18–19°C and 19–20°C.
+ankle-level air temperature, the discrepancy between predicted and
+observed rates widened as air speed increased: the model overpredicted
+dissatisfaction by `r res$diff[1]`%, rising to `r res$diff[3]`% at high
+flow (0.6 m/s). We observed similar trends at 18–19°C and 19–20°C.
 Notably, for the 19–20°C at high air speed (0.6 m/s), the model
 predicted a PPD of `r res$ppd_liu_mean[9]`%, while the actual
 dissatisfied rate was only `r res$dissatisfied_rate[9]`%, resulting in a
@@ -853,7 +888,9 @@ overestimation of approximately
 of the existing model on this study dataset, and (b) predicted and
 observed dissatisfaction under each experimental conditions (points
 represent mean values, with the segment length indicating the magnitude
-of model overestimation)](figs/model_performance_combined_raw.png){#fig-model-comp width="100%"}
+of model
+overestimation)](figs/model_performance_combined_raw.png){#fig-model-comp
+width="100%"}
 
 ## Updated model for winter conditions
 
@@ -959,16 +996,28 @@ model_final_table <- dplyr::bind_rows(
   dplyr::select(model_display, term_label, estimate_fmt, std_error_fmt, z_value_fmt, p_value_fmt)
 ```
 
-As shown in Section 3.4, the existing model consistently overestimated ankle draft dissatisfaction under winter conditions. This highlights the need for a revised model that accounts for differences in application contexts. To enable an integrated analysis of the effects of different factors on ankle draft dissatisfaction, we combined data from @liuPredictedPercentageDissatisfied2017 and collected in this study in the modeling dataset. Using “study source” indicator to distinguish these two datasets. The combined dataset is available at XXXX. 
+As shown in Section 3.4, the existing model consistently overestimated
+ankle draft dissatisfaction under winter conditions. This highlights the
+need for a revised model that accounts for differences in application
+contexts. To enable an integrated analysis of the effects of different
+factors on ankle draft dissatisfaction, we combined data from
+@liuPredictedPercentageDissatisfied2017 and collected in this study in
+the modeling dataset. Using “study source” indicator to distinguish
+these two datasets. The combined dataset is available at XXXX.
 
 To identify significant predictors, a model including all candidate
 predictors was first fitted following the methods described in Section
-2.6.4. Given that both datasets involved repeated measurements, a generalized linear mixed-effects model was used to account for subject-level dependence. The result of the screening model is shown in
+2.6.4. Given that both datasets involved repeated measurements, a
+generalized linear mixed-effects model was used to account for
+subject-level dependence. The result of the screening model is shown in
 @tbl-updated-model-screening. Ankle-level air speed, whole-body thermal
-sensation, and ankle condition (uncovered vs. covered) were significantly correlated with ankle
-draft dissatisfaction, whereas room air temperature, ankle-level air
-temperature, and turbulence intensity were not significant within the
-range investigated in this study. The study source was also not statistically significant, suggesting that no significant systematic difference remained between the two datasets after accounting for the measured predictors.
+sensation, and ankle condition (uncovered vs. covered) were
+significantly correlated with ankle draft dissatisfaction, whereas room
+air temperature, ankle-level air temperature, and turbulence intensity
+were not significant within the range investigated in this study. The
+study source was also not statistically significant, suggesting that no
+significant systematic difference remained between the two datasets
+after accounting for the measured predictors.
 
 ```{r}
 #| label: tbl-updated-model-screening
@@ -982,15 +1031,15 @@ knitr::kable(
 ```
 
 Based on these results, separate mixed-effects models for ankle draft
-dissatisfaction were developed for the ankle-uncovered and
-ankle-covered conditions, using ankle-level air speed and whole-body
-thermal sensation as predictors. As shown in @tbl-updated-model-final,
-the two final models exhibited the same structure but different
-coefficients. The intercept of the covered model was
+dissatisfaction were developed for the ankle-uncovered and ankle-covered
+conditions, using ankle-level air speed and whole-body thermal sensation
+as predictors. As shown in @tbl-updated-model-final, the two final
+models exhibited the same structure but different coefficients. The
+intercept of the covered model was
 `r sprintf("%.2f", abs(glmm_delta_intercept))` units lower than that of
 the uncovered model, indicating a lower baseline risk of ankle draft
-dissatisfaction when the ankle was covered by clothing. In addition,
-the air speed coefficient was smaller in the covered model than in the
+dissatisfaction when the ankle was covered by clothing. In addition, the
+air speed coefficient was smaller in the covered model than in the
 uncovered model, indicating reduced sensitivity of dissatisfaction to
 air speed under ankle-covered conditions.
 
@@ -1089,13 +1138,15 @@ Although the dataset used by @liuPredictedPercentageDissatisfied2017
 included both exposed and covered ankle conditions, no significant
 clothing effect was identified in their analysis even if the ankle
 condition (covered vs uncovered) was the third most important variable
-after ankle air speed and whole-body thermal sensation. However, when we reanalyzed their dataset using a mixed-effects model structure, the clothing effect became statistically significant (p = 0.00423). The discrepancy
-in the significance of this variable likely stems from their use of
-standard logistic regression, which pooled observations across subjects
-without accounting for the non-independence introduced by repeated
-measures. This approach may have masked the clothing effect as a
-between-subject variable due to inter-individual variability, which is a
-limitation addressed in our study through the use of mixed-effects
+after ankle air speed and whole-body thermal sensation. However, when we
+reanalyzed their dataset using a mixed-effects model structure, the
+clothing effect became statistically significant (p = 0.00423). The
+discrepancy in the significance of this variable likely stems from their
+use of standard logistic regression, which pooled observations across
+subjects without accounting for the non-independence introduced by
+repeated measures. This approach may have masked the clothing effect as
+a between-subject variable due to inter-individual variability, which is
+a limitation addressed in our study through the use of mixed-effects
 models.
 
 ## Mechanisms
@@ -1122,16 +1173,17 @@ variations in skin temperature than with absolute values
 study, ankle $\Delta T_{\text{sk}}$ relative to the baseline adaptation
 period showed significant differences between low and medium/high air
 speed conditions across all ankle-level air temperature conditions
-(effect size *d* ≈ `r tsk_delta_low_vs_higher_d_range$min_val`–`r tsk_delta_low_vs_higher_d_range$max_val`). Consistent with this, local
-ankle thermal sensation at medium and high speeds was significantly
-lower than at low speed under the 17–18°C condition. However, air
-movement acceptability did not differ significantly across conditions,
-indicating that while air speed produced measurable shifts in skin
-temperature and local thermal sensation, the magnitude of these changes
-was insufficient to generate distinguishable differences in
-dissatisfaction within the tested range. From a heat transfer
-perspective, clothing coverage increases local thermal resistance and
-reduces convective and radiative heat exchange
+(effect size *d* ≈
+`r tsk_delta_low_vs_higher_d_range$min_val`–`r tsk_delta_low_vs_higher_d_range$max_val`).
+Consistent with this, local ankle thermal sensation at medium and high
+speeds was significantly lower than at low speed under the 17–18°C
+condition. However, air movement acceptability did not differ
+significantly across conditions, indicating that while air speed
+produced measurable shifts in skin temperature and local thermal
+sensation, the magnitude of these changes was insufficient to generate
+distinguishable differences in dissatisfaction within the tested range.
+From a heat transfer perspective, clothing coverage increases local
+thermal resistance and reduces convective and radiative heat exchange
 [@oguroEvaluationEffectAir2001; @nishiDirectMeasurementClothing1975],
 suppressing both the magnitude and variability of skin temperature
 changes and making it less likely that occupants cross discomfort
@@ -1220,7 +1272,19 @@ to ankle draft. The generalizability of these findings to broader
 occupant populations warrants further investigation.
 
 Third, the experimental protocol involved 20-minute exposure periods,
-whereas real occupants experience sustained exposure over hours. The observed skin temperature responses indicated that skin temperature had not fully stabilized within the 20-minute exposure period. Although we use exponential fitting and the ABC model to estimate skin temperature changes from 20 to 90 minutes and their potential influence on subjective thermal sensation (shown in Appendix A), these estimates remain assumption-based. In addition, air movement acceptability beyond the 20-minute exposure period could not be directly predicted. Therefore, the ankle draft dissatisfaction percentage under longer exposure durations may be higher than that estimated by the current model. Similarly, participants remained seated throughout; standing or walking occupants may have different thermal experiences at the ankle level.
+whereas real occupants experience sustained exposure over hours. The
+observed skin temperature responses indicated that skin temperature had
+not fully stabilized within the 20-minute exposure period. Although we
+use exponential fitting and the ABC model to estimate skin temperature
+changes from 20 to 90 minutes and their potential influence on
+subjective thermal sensation (shown in Appendix A), these estimates
+remain assumption-based. In addition, air movement acceptability beyond
+the 20-minute exposure period could not be directly predicted.
+Therefore, the ankle draft dissatisfaction percentage under longer
+exposure durations may be higher than that estimated by the current
+model. Similarly, participants remained seated throughout; standing or
+walking occupants may have different thermal experiences at the ankle
+level.
 
 Fourth, the experimental conditions covered supply air temperatures of
 15–19°C, leading to ankle-level air temperatures from 17-20°C, and air
@@ -1268,14 +1332,15 @@ an intercept difference of approximately 1.5 units on the logit scale.
 Consistent with prior model structures, we found that whole-body thermal
 sensation and air speed at the ankle are the primary predictors of
 dissatisfaction, whereas ankle air temperature, room temperature, and
-turbulence intensity were not significant within the tested ranges. 
+turbulence intensity were not significant within the tested ranges.
 
 This reduced sensitivity under winter clothing appears to stem from a
 combination of physiological mechanisms and potentially psychological
 factors. Physiologically, increased thermal resistance from clothing
 coverage likely attenuated the effect of local cooling, with ankle skin
 temperature decreasing by 0.8°C to 1.7°C across all experimental
-conditions. Psychologically, perceived protection from clothing may also have contributed to the reduced sensitivity.
+conditions. Psychologically, perceived protection from clothing may also
+have contributed to the reduced sensitivity.
 
 These findings support a differentiated approach to ankle draft
 assessment in building standards. For winter heating scenarios where
@@ -1291,11 +1356,12 @@ emissions.
 
 **Tobias Kramer**: Conceptualization, Data curation, Formal analysis,
 Methodology, Investigation, Project administration, Software, Writing -
-original draft, Writing - review & editing, Visualization. **Junmeng Lyu**: Data
-curation, Formal analysis, Methodology, Investigation, Software,
-Writing - original draft, Writing - review & editing, Visualization. **Stefano
-Schiavon**: Conceptualization, Funding acquisition, Methodology, Project
-administration, Supervision, Writing - review & editing, Visualization.
+original draft, Writing - review & editing, Visualization. **Junmeng
+Lyu**: Data curation, Formal analysis, Methodology, Investigation,
+Software, Writing - original draft, Writing - review & editing,
+Visualization. **Stefano Schiavon**: Conceptualization, Funding
+acquisition, Methodology, Project administration, Supervision, Writing -
+review & editing, Visualization.
 
 # Declaration of competing interest {.unnumbered}
 
@@ -1368,13 +1434,32 @@ tsk_delta_extrapolation_range <- tsk_delta_exponential_fits %>%
   )
 ```
 
+Because ankle skin temperature had not fully stabilized by the end of
+the 20 min exposure, we further fitted an exponential regression model
+to the measured skin temperature changes during the first 20 min and
+extrapolated the trend from 20 to 90 min, as shown in
+@fig-tsk-delta-extrapolation. The results indicate that ankle skin
+temperature approached a stable level at approximately 90 min, with an
+additional decrease of about
+`r tsk_delta_extrapolation_range$min_val`–`r tsk_delta_extrapolation_range$max_val`
+°C between 20 and 90 min. This extrapolation was broadly consistent with
+simulations from the Advanced Berkeley Comfort (ABC) model under the
+same experimental conditions, which predicted an additional ankle skin
+temperature decrease of approximately 0.3–0.7 °C.
 
-Because ankle skin temperature had not fully stabilized by the end of the 20 min exposure, we further fitted an exponential regression model to the measured skin temperature changes during the first 20 min and extrapolated the trend from 20 to 90 min, as shown in @fig-tsk-delta-extrapolation. The results indicate that ankle skin temperature approached a stable level at approximately 90 min, with an additional decrease of about `r tsk_delta_extrapolation_range$min_val`–`r tsk_delta_extrapolation_range$max_val` °C between 20 and 90 min. This extrapolation was broadly consistent with simulations from the Advanced Berkeley Comfort (ABC) model under the same experimental conditions, which predicted an additional ankle skin temperature decrease of approximately 0.3–0.7 °C.
+Further estimates based on the ABC model indicated that the
+corresponding changes in local and whole-body thermal sensation were
+both below 0.3 thermal sensation units. This suggests that continuing
+exposure beyond 20 min until skin temperature stabilization would
+produce only a small subjective perceptual change. Therefore, although
+ankle skin temperature had not fully stabilized at 20 min, its influence
+on the present dissatisfaction prediction model is expected to be
+limited.
 
-Further estimates based on the ABC model indicated that the corresponding changes in local and whole-body thermal sensation were both below 0.3 thermal sensation units. This suggests that continuing exposure beyond 20 min until skin temperature stabilization would produce only a small subjective perceptual change. Therefore, although ankle skin temperature had not fully stabilized at 20 min, its influence on the present dissatisfaction prediction model is expected to be limited.
-
-![Estimated ankle skin temperature changes across experimental conditions. Solid lines show measured mean values during the first 20 min, and dashed lines show exponential extrapolations from 20 to 90 min.
-](figs/tsk_delta_extrapolation_p.png){#fig-tsk-delta-extrapolation
+![Estimated ankle skin temperature changes across experimental
+conditions. Solid lines show measured mean values during the first 20
+min, and dashed lines show exponential extrapolations from 20 to 90
+min.](figs/tsk_delta_extrapolation_p.png){#fig-tsk-delta-extrapolation
 width="90%"}
 
 # Appendix C: Effect of draft dissatisfaction definition on model {#sec-appendix-c .unnumbered}
@@ -1444,18 +1529,66 @@ appendix_c_pref_covered_range <- appendix_c_thresholds %>%
   dplyr::pull()
 ```
 
-Draft is defined as unwanted local cooling of the body caused by air movement[@ashraeANSIASHRAEStandard2023]. To enable comparison with the existing model, this study adopted the same definition of draft dissatisfaction as @liuPredictedPercentageDissatisfied2017, where an occupant is considered dissatisfied with draft when the local thermal sensation is below 0 and the local air movement is unacceptable.
+Draft is defined as unwanted local cooling of the body caused by air
+movement[@ashraeANSIASHRAEStandard2023]. To enable comparison with the
+existing model, this study adopted the same definition of draft
+dissatisfaction as @liuPredictedPercentageDissatisfied2017, where an
+occupant is considered dissatisfied with draft when the local thermal
+sensation is below 0 and the local air movement is unacceptable.
 
-This definition raises a methodological issue: whether draft dissatisfaction should be characterized using air movement acceptability or air movement preference. Compared with acceptability, preference is stricter. A preference for less air movement does not necessarily mean that the current condition is unacceptable; rather, it may indicate a demand for a higher level of comfort. Under the ankle-covered condition in this study, the incidence of draft dissatisfaction was approximately `r format_pct_1(appendix_c_rates$acc_toby_covered)` when defined as “local thermal sensation < 0 and air movement unacceptable.” When defined as “local thermal sensation < 0 and preference for less air movement,” the incidence increased to approximately `r format_pct_1(appendix_c_rates$pref_toby_covered)`. A similar pattern was observed in the ankle-uncovered subset of Liu's dataset, where the observed dissatisfaction rate increased from `r format_pct_1(appendix_c_rates$acc_liu_uncovered)` to `r format_pct_1(appendix_c_rates$pref_liu_uncovered)` when the preference-based definition was used.
+This definition raises a methodological issue: whether draft
+dissatisfaction should be characterized using air movement acceptability
+or air movement preference. Compared with acceptability, preference is
+stricter. A preference for less air movement does not necessarily mean
+that the current condition is unacceptable; rather, it may indicate a
+demand for a higher level of comfort. Under the ankle-covered condition
+in this study, the incidence of draft dissatisfaction was approximately
+`r format_pct_1(appendix_c_rates$acc_toby_covered)` when defined as
+“local thermal sensation \< 0 and air movement unacceptable.” When
+defined as “local thermal sensation \< 0 and preference for less air
+movement,” the incidence increased to approximately
+`r format_pct_1(appendix_c_rates$pref_toby_covered)`. A similar pattern
+was observed in the ankle-uncovered subset of Liu's dataset, where the
+observed dissatisfaction rate increased from
+`r format_pct_1(appendix_c_rates$acc_liu_uncovered)` to
+`r format_pct_1(appendix_c_rates$pref_liu_uncovered)` when the
+preference-based definition was used.
 
-To further examine the influence of these two definitions on model outcomes, we fitted the draft dissatisfaction model using the same model structure, but redefining draft dissatisfaction as “local thermal sensation < 0 and air movement preference = less.” The results are shown in @fig-model-amp.
+To further examine the influence of these two definitions on model
+outcomes, we fitted the draft dissatisfaction model using the same model
+structure, but redefining draft dissatisfaction as “local thermal
+sensation \< 0 and air movement preference = less.” The results are
+shown in @fig-model-amp.
 
-![Prediction surfaces of draft dissatisfaction based on the preference-based definition. Draft dissatisfaction was defined as local thermal sensation below 0 and a preference for less air movement. (a) ankle-uncovered conditions, and (b) ankle-covered conditions.](figs/Model_amp.png){#fig-model-amp width="100%"}
+![Prediction surfaces of draft dissatisfaction based on the
+preference-based definition. Draft dissatisfaction was defined as local
+thermal sensation below 0 and a preference for less air movement. (a)
+ankle-uncovered conditions, and (b) ankle-covered
+conditions.](figs/Model_amp.png){#fig-model-amp width="100%"}
 
-The results show clear differences between the limits derived from the two definitions, especially around the 20% dissatisfaction threshold. For whole-body thermal sensation between −0.5 and +0.5, the acceptability-based model gives a threshold air speed range of `r get_v20_text("acc", "exposed", -0.5)` to `r get_v20_text("acc", "exposed", 0.5)` under the ankle-uncovered condition, and `r get_v20_text("acc", "unexposed", -0.5)` to `r get_v20_text("acc", "unexposed", 0.5)` under the ankle-covered condition. In contrast, the preference-based model shifts the predicted dissatisfaction percentage higher and narrows the allowable air speed range. Under the ankle-uncovered condition, the 20% threshold is exceeded at TS = −0.5 `r get_v20_text("pref", "exposed", -0.5)`, and the threshold air speed is only `r get_v20_text("pref", "exposed", 0.5)` at TS = +0.5. Under the ankle-covered condition, the threshold range is approximately `r appendix_c_pref_covered_range`, which is still lower than that obtained using the acceptability-based definition.
+The results show clear differences between the limits derived from the
+two definitions, especially around the 20% dissatisfaction threshold.
+For whole-body thermal sensation between −0.5 and +0.5, the
+acceptability-based model gives a threshold air speed range of
+`r get_v20_text("acc", "exposed", -0.5)` to
+`r get_v20_text("acc", "exposed", 0.5)` under the ankle-uncovered
+condition, and `r get_v20_text("acc", "unexposed", -0.5)` to
+`r get_v20_text("acc", "unexposed", 0.5)` under the ankle-covered
+condition. In contrast, the preference-based model shifts the predicted
+dissatisfaction percentage higher and narrows the allowable air speed
+range. Under the ankle-uncovered condition, the 20% threshold is
+exceeded at TS = −0.5 `r get_v20_text("pref", "exposed", -0.5)`, and the
+threshold air speed is only `r get_v20_text("pref", "exposed", 0.5)` at
+TS = +0.5. Under the ankle-covered condition, the threshold range is
+approximately `r appendix_c_pref_covered_range`, which is still lower
+than that obtained using the acceptability-based definition.
 
-Overall, the two definitions do not alter the main conclusion of the model, which is ankle coverage reduces the risk of draft dissatisfaction. However, the acceptability-based definition is more appropriate for defining standard limits. In contrast, the preference-based definition provides more conservative air speed limits and reflects the need for further improvement in air movement conditions under a higher comfort requirement.
-
-
+Overall, the two definitions do not alter the main conclusion of the
+model, which is ankle coverage reduces the risk of draft
+dissatisfaction. However, the acceptability-based definition is more
+appropriate for defining standard limits. In contrast, the
+preference-based definition provides more conservative air speed limits
+and reflects the need for further improvement in air movement conditions
+under a higher comfort requirement.
 
 # References {.unnumbered}
