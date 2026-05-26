@@ -97,15 +97,21 @@ costs, energy use, and carbon emissions.
 
 # Keywords {.unnumbered}
 
-thermal comfort; ankle draft; local thermal discomfort; winter clothing; ASHRAE Standard 55
+thermal comfort; ankle draft; local thermal discomfort; winter clothing;
+ASHRAE Standard 55
 
 # Highlights {.unnumbered}
 
-- Existing ankle draft model overpredicts dissatisfaction 2.8× under winter clothing
-- Covered-ankle dissatisfaction ranged 6–20% vs. 23–57% for exposed ankles
-- New covered-ankle model shows lower baseline risk and reduced air speed sensitivity
-- Only whole-body thermal sensation and air speed are significant draft predictors
-- Separate ASHRAE 55 ankle draft criteria by clothing level could reduce energy use
+-   Existing ankle draft model overpredicts dissatisfaction 2.8× under
+    winter clothing
+-   Covered-ankle dissatisfaction ranged 6–20% vs. 23–57% for exposed
+    ankles
+-   New covered-ankle model shows lower baseline risk and reduced air
+    speed sensitivity
+-   Only whole-body thermal sensation and air speed are significant
+    draft predictors
+-   Separate ASHRAE 55 ankle draft criteria by clothing level could
+    reduce energy use
 
 # Introduction
 
