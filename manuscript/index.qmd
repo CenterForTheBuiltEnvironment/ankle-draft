@@ -6,12 +6,12 @@ authors:
       - ref: cbe
     corresponding: true
     email: t.kramer@berkeley.edu
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0001-6250-6718
   - name: Junmeng Lyu
     affiliations:
       - ref: cbe
       - ref: sjtu
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0003-0043-4127
   - name: Stefano Schiavon
     affiliations:
       - ref: cbe
@@ -46,7 +46,7 @@ format:
     comments:
       hypothesis: true
 bibliography: refs.bib
-csl: apa.csl
+csl: building-and-environment.csl
 execute:
   echo: false
   warning: false
@@ -71,9 +71,9 @@ shoes (\~0.75 clo). This study evaluated thermal comfort responses to
 ankle-level draft under such winter clothing conditions through
 controlled laboratory experiments with 51 participants. Using a
 within-subjects repeated-measures design, we exposed participants to
-nine conditions varying ankle-level air temperature (17-20°C) and air
-speed (0.1–0.7 m/s) simulating window downdraft while they wore clothing
-ensembles targeting 0.75 clo.
+nine conditions varying in ankle-level air temperature (17-20°C) and air
+speed (0.1–0.7 m/s), simulating window downdraft while they wore
+clothing ensembles targeting 0.75 clo.
 
 The existing ankle draft model systematically overpredicted
 dissatisfaction across all conditions. While prior studies with exposed
@@ -102,8 +102,8 @@ ASHRAE Standard 55
 
 # Highlights {.unnumbered}
 
--   Existing ankle draft model overpredicts dissatisfaction 2.8× under
-    winter clothing
+-   Existing ankle draft model overpredicts dissatisfaction by a factor
+    of 2.8 under winter clothing
 -   Covered-ankle dissatisfaction ranged 6–20% vs. 23–57% for exposed
     ankles
 -   New covered-ankle model shows lower baseline risk and reduced air
@@ -112,6 +112,12 @@ ASHRAE Standard 55
     draft predictors
 -   Separate ASHRAE 55 ankle draft criteria by clothing level could
     reduce energy use
+
+# Graphical abstract {.unnumbered}
+
+![Graphical
+abstract.](figs/graphical-abstract.png){#fig-graphical-abstract
+width="75%"}
 
 # Introduction
 
@@ -126,8 +132,8 @@ discomfort at the lower extremities of seated occupants
 [@schellenDowndraughtAssessmentDesign2012;
 @larssonExperimentalInvestigationDowndraught2002]. Building designers
 typically address this issue by increasing the insulation level of
-windows, so that the interior surface temperature is higher, adding
-mullions to break the downward flow and by installing perimeter heating
+windows, so that the interior surface temperature is higher, by adding
+mullions to break the downward flow or by installing perimeter heating
 systems, such as radiators or in-floor heating, to counteract the
 downdraft effect and to prevent thermal discomfort in the ankle region.
 
@@ -152,24 +158,24 @@ clothing insulation in commercial spaces during heating seasons is
 approximately 0.75 clo, with occupants commonly wearing long trousers,
 closed-toe shoes and socks that cover the ankle region. This discrepancy
 raises an important question: does the current ankle draft model, which
-is calibrated for summer conditions where approximately two-thirds of
-test cases involved exposed ankles, accurately predict discomfort when
-ankles are covered by clothing?
+is calibrated for summer conditions and derived from experiments where
+approximately two-thirds of test cases involved exposed ankles,
+accurately predict discomfort when ankles are covered by clothing?
 
 If the current model overestimates draft risk under winter clothing
 conditions, the practical implications are significant. Designers may be
 specifying solutions, like perimeter heating systems, that are larger
 than necessary, or installing them in situations where they could be
 avoided entirely. This has consequences for both first costs and
-operational energy consumption and related carbon emission. Conversely,
-if the model underestimates risk, occupants may experience discomfort
-that compromises satisfaction and performance.
+operational energy use and related carbon emission. Conversely, if the
+model underestimates risk, occupants may experience discomfort that
+compromises satisfaction and performance.
 
 The objective of this study is to evaluate thermal comfort responses to
 ankle-level draft under typical winter clothing conditions through
 controlled laboratory experiments. We aim to: (1) characterize
-whole-body and local thermal perception across a range of supply air
-temperatures and air speeds representative of window downdraft
+whole-body and local thermal perception across a range of ankle-level
+air temperatures and air speeds representative of window downdraft
 conditions; (2) compare observed dissatisfaction rates with predictions
 from the existing ankle draft model; and (3) assess whether the current
 ASHRAE 55 criteria require adjustment for winter scenarios. The findings
@@ -196,11 +202,11 @@ with earlier studies focusing on summer conditions
 Participants attended four sessions: an introductory session for
 explaining the experiment and obtaining consent, followed by three
 experimental sessions of approximately two hours each. Each experimental
-session corresponded to one SAT level, with participants experiencing
-all three air speed conditions within that session in a counterbalanced
-order. We scheduled sessions on separate days to minimize carryover
-effects and subjects were allowed to attend the three sessions in their
-preferred order.
+session corresponded to one SAT level, or ankle-level air temperature,
+respectively, with participants experiencing all three air speed
+conditions within that session in a counterbalanced order. We scheduled
+sessions on separate days to minimize carryover effects and subjects
+were allowed to attend the three sessions in their preferred order.
 
 ## Climate chamber and apparatus
 
@@ -212,8 +218,8 @@ during breaks in the back of the room. Ambient room conditions were
 maintained at approximately 22°C operative temperature, 50% relative
 humidity, and background air velocity below 0.1 m/s, targeting a
 whole-body thermal sensation of approximately −0.5 (slightly cool) on
-the ASHRAE seven-point scale as calculated using the CBE Comfort Tool
-[@tartariniCBEThermalComfort2020].
+the ASHRAE seven-point scale and as calculated using the CBE Comfort
+Tool [@tartariniCBEThermalComfort2020].
 
 ![Experimental configuration and temporal protocol: (a) Seated occupant
 positioned 0.7 m from the custom displacement diffuser, which simulates
@@ -261,7 +267,7 @@ here because they stayed constant and within expected ranges.
 
 ### Physiological
 
-In addition, we recorded continuously participants skin temperature on
+In addition, we continuously recorded participants' skin temperature on
 the lateral lower leg (mid-calf) and feet using iButton sensors
 (Thermochron, Maxim Integrated, USA, Type DS1923; measurement range:
 20°C to 85°C; accuracy: ±0.5°C; resolution: 0.0625°C) attached with
@@ -275,9 +281,9 @@ To assess the perception of the thermal environment we used validated
 scales consistent with prior ankle draft research and ASHRAE Standard 55
 requirements. We employed two questionnaires: a comprehensive one,
 encompassing all questions, administered shortly before the conclusion
-of the exposure (F), and a concise, partial one, comprising a subset of
-the questions, at the end of each adaptation period. For details on the
-timing of the questionnaires, please refer to @fig-setup, and for
+of the exposure (F), and a concise, partial one (P), comprising a subset
+of the questions, at the end of each adaptation period. For details on
+the timing of the questionnaires, please refer to @fig-setup, and for
 information on the constructs and their respective scales, please refer
 to @tbl-scales below. We administered the questions electronically via a
 custom survey tool written in Java. Participants were not required to
@@ -308,7 +314,7 @@ consented to future contact. Eligible participants were between 21 and
 cardiorespiratory conditions or recent major surgery. Pregnant
 individuals were excluded. The UC Berkeley Committee for Protection of
 Human Subjects (CPHS) approved the research protocol (CPHS
-##2025-07-18795). Before the tests, all subjects signed an informed
+#2025-07-18795). Before the tests, all subjects signed an informed
 consent form. Demographic details of the cohort are summarized in
 @tbl-demographics.
 
@@ -437,10 +443,10 @@ Subject was included as a random intercept to account for
 between-subject heterogeneity and within-subject dependence arising from
 repeated measurements. Continuous predictors were mean-centered using
 the overall means of the dataset before model fitting. Model performance
-was evaluated using marginal and conditional $R^2$
-[@GLMMR2Nakagawa2013]. The marginal $R^2$ quantifies the variance
-explained by the fixed effects, whereas the conditional $R^2$ quantifies
-the variance explained by both fixed and random effects.
+was evaluated using marginal and conditional $R^2$ [@nakagawa2013]. The
+marginal $R^2$ quantifies the variance explained by the fixed effects,
+whereas the conditional $R^2$ quantifies the variance explained by both
+fixed and random effects.
 
 Because the inverse-logit transformation is nonlinear, fixed-effect
 predictions from a logistic mixed model do not directly represent
@@ -461,7 +467,7 @@ We performed all data processing, statistical analyses, and model
 fitting in R (version 4.4.1). The main packages we used were tidyverse
 (version 2.0.0), lme4 (version 2.0.1), rstatix (version 0.7.3), and
 CalibrationCurves (version 3.0.0). Data and analysis code are available
-on: https://github.com/CenterForTheBuiltEnvironment/ankle-draft-II
+on: https://github.com/CenterForTheBuiltEnvironment/ankle-draft
 
 # Results {#sec-results}
 
@@ -1084,13 +1090,14 @@ model_final_table <- dplyr::bind_rows(
   )
 ```
 
-As shown in Section 3.4, the existing model consistently overestimated
-ankle draft dissatisfaction under winter conditions. This highlights the
-need for a revised model that accounts for differences in application
-contexts. To enable an integrated analysis of the effects of different
-factors on ankle draft dissatisfaction, we combined data from
+As shown in @sec-model-comp, the existing model consistently
+overestimated ankle draft dissatisfaction under winter conditions. This
+highlights the need for a revised model that accounts for differences in
+application contexts. To enable an integrated analysis of the effects of
+different factors on ankle draft dissatisfaction, we combined data from
 @liuPredictedPercentageDissatisfied2017 and collected in this study in
-the modeling dataset. The combined dataset is available at XXXX.
+the modeling dataset. The combined dataset is available at
+<https://github.com/CenterForTheBuiltEnvironment/ankle-draft>.
 
 To identify significant predictors, we selected candidate variables
 based on the initial variable screening procedure used by
@@ -1104,13 +1111,13 @@ differences between the datasets after controlling for the other
 predictors.
 
 We first fitted a model including all candidate predictors following the
-methods described in Section 2.6.4. The result of the screening model is
-shown in @tbl-updated-model-screening. Ankle-level air speed, whole-body
-thermal sensation, and ankle coverage status (uncovered vs. covered)
-were significantly correlated with ankle draft dissatisfaction, whereas
-room air temperature, ankle-level air temperature, and turbulence
-intensity were not significant within the range investigated in this
-study. The data source was also not statistically significant,
+methods described in @sec-method-new-model. The result of the screening
+model is shown in @tbl-updated-model-screening. Ankle-level air speed,
+whole-body thermal sensation, and ankle coverage status (uncovered vs.
+covered) were significantly correlated with ankle draft dissatisfaction,
+whereas room air temperature, ankle-level air temperature, and
+turbulence intensity were not significant within the range investigated
+in this study. The data source was also not statistically significant,
 suggesting that no significant systematic difference remained between
 the two datasets after accounting for the measured predictors.
 
@@ -1152,8 +1159,8 @@ knitr::kable(
 )
 ```
 
-As described in Section 2.6, although the conditional prediction from
-the mixed-effects model has a simple logistic form, the
+As described in @sec-method-new-model, although the conditional
+prediction from the mixed-effects model has a simple logistic form, the
 population-averaged marginal prediction requires integration over the
 random-intercept distribution and generally has no simple closed-form
 expression. Therefore, we used Monte Carlo simulation to obtain the
@@ -1402,7 +1409,7 @@ Fifth, airflow was delivered from behind the participants to simulate a
 window downdraft approaching their lower legs from the façade. This
 scenario, identified by @toftumEffectAirflowDirection1997 as one of the
 most unfavorable situations, was used to study the impact of airflow on
-the participants.. Other airflow directions (lateral or frontal) may
+the participants. Other airflow directions (lateral or frontal) may
 produce different perceptual responses, particularly given potential
 differences in skin exposure and attention to the stimulus source.
 
@@ -1500,8 +1507,8 @@ California, Berkeley supported this research.
 
 The following figures show the full response distributions for thermal
 sensation, thermal preference, and air movement acceptability and
-preference. These complement the scatter plots with linear regression
-lines presented in @sec-results in the main text.
+preference. These complement the scatter plots with mixed-effects
+regression lines presented in @sec-results in the main text.
 
 ![Whole-body thermal sensation (a) and thermal preference (b) votes by
 ankle-level air temperature and air speed. Participants predominantly
