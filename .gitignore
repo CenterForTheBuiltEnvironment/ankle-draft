@@ -19,5 +19,8 @@
 
 # Claude
 CLAUDE.md
+
+# Submission materials (not tracked)
+manuscript/submission/
 /.quarto/
 **/*.quarto_ipynb
