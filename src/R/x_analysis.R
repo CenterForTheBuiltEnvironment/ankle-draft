@@ -846,24 +846,24 @@ ggsave(
   bg     = "transparent"
 )
 
-# LM stats table (for text references) ----------------------------------------
+# LME stats table (for text references) ---------------------------------------
 
-lm_stats_d <- dplyr::bind_rows(
-  bind_lm(compute_lm_stats(ts_scatter_overall, "t_supply_c", "response_value_num", "workstation"),
+lme_stats_d <- dplyr::bind_rows(
+  bind_lm(compute_lme_stats(ts_scatter_overall, "t_supply_c", "response_value_num", "workstation"),
           "thermal_sensation_overall",    "t_supply_c"),
-  bind_lm(compute_lm_stats(ts_scatter_overall, "v_air_m_s",  "response_value_num", "session_sat"),
+  bind_lm(compute_lme_stats(ts_scatter_overall, "v_air_m_s",  "response_value_num", "session_sat"),
           "thermal_sensation_overall",    "v_air_m_s"),
-  bind_lm(compute_lm_stats(ts_scatter_ankles,  "t_supply_c", "response_value_num", "workstation"),
+  bind_lm(compute_lme_stats(ts_scatter_ankles,  "t_supply_c", "response_value_num", "workstation"),
           "thermal_sensation_ankles",     "t_supply_c"),
-  bind_lm(compute_lm_stats(ts_scatter_ankles,  "v_air_m_s",  "response_value_num", "session_sat"),
+  bind_lm(compute_lme_stats(ts_scatter_ankles,  "v_air_m_s",  "response_value_num", "session_sat"),
           "thermal_sensation_ankles",     "v_air_m_s"),
-  bind_lm(compute_lm_stats(ta_scatter_overall, "t_supply_c", "response_plot",      "workstation"),
+  bind_lm(compute_lme_stats(ta_scatter_overall, "t_supply_c", "response_plot",      "workstation"),
           "thermal_acceptability_overall","t_supply_c"),
-  bind_lm(compute_lm_stats(ta_scatter_overall, "v_air_m_s",  "response_plot",      "session_sat"),
+  bind_lm(compute_lme_stats(ta_scatter_overall, "v_air_m_s",  "response_plot",      "session_sat"),
           "thermal_acceptability_overall","v_air_m_s"),
-  bind_lm(compute_lm_stats(am_scatter_acc,     "t_supply_c", "response_plot",      "workstation"),
+  bind_lm(compute_lme_stats(am_scatter_acc,     "t_supply_c", "response_plot",      "workstation"),
           "air_movement_acceptability",   "t_supply_c"),
-  bind_lm(compute_lm_stats(am_scatter_acc,     "v_air_m_s",  "response_plot",      "session_sat"),
+  bind_lm(compute_lme_stats(am_scatter_acc,     "v_air_m_s",  "response_plot",      "session_sat"),
           "air_movement_acceptability",   "v_air_m_s")
 )
 

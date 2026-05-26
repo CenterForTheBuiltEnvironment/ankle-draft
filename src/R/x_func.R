@@ -330,19 +330,51 @@ plot_pairedwilcox <- function(data, outcome_var, posthoc_result,
 
 # Scatter + LM Plot Functions ==================================================
 
-#' Compute per-group LM slope, intercept, and R² (saved to CSV; not plotted)
-compute_lm_stats <- function(data, x_var, y_var, color_var) {
+#' Compute per-group LME slope, intercept, and marginal R² (saved to CSV; not plotted)
+#' Uses random intercept per subject to respect within-subject structure.
+#' Marginal R² follows Nakagawa & Schielzeth (2013): variance of fixed-effect
+#' predictions divided by total variance (fixed + random intercept + residual).
+compute_lme_stats <- function(data, x_var, y_var, color_var) {
   data %>%
     dplyr::group_by(.data[[color_var]]) %>%
     dplyr::group_modify(~ {
-      fit <- lm(reformulate(x_var, y_var), data = .x)
+      fit      <- lme4::lmer(reformulate(c(x_var, "(1 | subject_id)"), y_var),
+                             data = .x, REML = TRUE)
+      fe       <- lme4::fixef(fit)
+      sigma2_f <- var(predict(fit, re.form = NA))
+      vc       <- lme4::VarCorr(fit)
+      sigma2_a <- as.numeric(vc$subject_id)
+      sigma2_e <- sigma(fit)^2
       tibble::tibble(
-        slope     = coef(fit)[[2]],
-        intercept = coef(fit)[[1]],
-        r2        = summary(fit)$r.squared
+        slope     = fe[[x_var]],
+        intercept = fe[["(Intercept)"]],
+        r2        = sigma2_f / (sigma2_f + sigma2_a + sigma2_e)
       )
     }) %>%
     dplyr::ungroup()
+}
+
+#' Compute population-average LME prediction lines + 95% CIs for plotting.
+#' CIs are derived from the fixed-effects variance-covariance matrix only,
+#' so they reflect uncertainty in the marginal trend, not between-subject spread.
+compute_lme_predictions <- function(data, x_var, y_var, color_var, n_points = 100) {
+  data %>%
+    dplyr::group_by(.data[[color_var]]) %>%
+    dplyr::group_modify(~ {
+      fit     <- lme4::lmer(reformulate(c(x_var, "(1 | subject_id)"), y_var),
+                            data = .x, REML = TRUE)
+      x_seq   <- seq(min(.x[[x_var]], na.rm = TRUE),
+                     max(.x[[x_var]], na.rm = TRUE),
+                     length.out = n_points)
+      newdata <- tibble::tibble(!!x_var := x_seq)
+      pred    <- predict(fit, newdata = newdata, re.form = NA)
+      X       <- model.matrix(reformulate(x_var), newdata)
+      se      <- sqrt(diag(X %*% as.matrix(vcov(fit)) %*% t(X)))
+      tibble::tibble(x = x_seq, fit = pred,
+                     lower = pred - 1.96 * se, upper = pred + 1.96 * se)
+    }) %>%
+    dplyr::ungroup() %>%
+    dplyr::rename(!!x_var := x)
 }
 
 bind_lm <- function(r2_obj, outcome, x_var) {
@@ -355,7 +387,7 @@ bind_lm <- function(r2_obj, outcome, x_var) {
 }
 
 format_r2 <- function(data, x_var, y_var, color_var, level_order) {
-  compute_lm_stats(data, x_var, y_var, color_var) %>%
+  compute_lme_stats(data, x_var, y_var, color_var) %>%
     dplyr::arrange(factor(.data[[color_var]], levels = level_order)) %>%
     dplyr::pull(r2) %>%
     sprintf("%.2f", .) %>%
@@ -363,21 +395,25 @@ format_r2 <- function(data, x_var, y_var, color_var, level_order) {
     paste0("R²: ", .)
 }
 
-#' Generic scatter + LM panel (full y-scale enforced by limits; inside legend)
+#' Generic scatter + LME panel (full y-scale enforced by limits; inside legend)
 plot_scatter_lm <- function(data, x_var, y_var, color_var, palette,
                             x_label, y_label, y_breaks, y_labels,
                             color_title, x_breaks = NULL, x_limits = NULL) {
-  r2_sub <- format_r2(data, x_var, y_var, color_var, names(palette))
+  r2_sub    <- format_r2(data, x_var, y_var, color_var, names(palette))
+  pred_data <- compute_lme_predictions(data, x_var, y_var, color_var)
   ggplot(data, aes(x = .data[[x_var]], y = .data[[y_var]],
                    color = .data[[color_var]])) +
     geom_jitter(alpha = 0.35, size = 0.8, width = 0.05) +
-    geom_smooth(
-      aes(fill = .data[[color_var]]),
-      method    = "lm",
-      formula   = y ~ x,
-      se        = TRUE,
-      alpha     = 0.15,
-      linewidth = 0.7
+    geom_ribbon(
+      data = pred_data,
+      aes(x = .data[[x_var]], ymin = lower, ymax = upper,
+          fill = .data[[color_var]]),
+      alpha = 0.15, inherit.aes = FALSE
+    ) +
+    geom_line(
+      data = pred_data,
+      aes(x = .data[[x_var]], y = fit, color = .data[[color_var]]),
+      linewidth = 0.7, inherit.aes = FALSE
     ) +
     scale_color_manual(values = palette, name = color_title) +
     scale_fill_manual(values = palette, guide = "none") +
@@ -409,11 +445,12 @@ plot_scatter_lm <- function(data, x_var, y_var, color_var, palette,
     )
 }
 
-#' Acceptability scatter + LM panel (top legend; y-axis trimmed to label range)
+#' Acceptability scatter + LME panel (top legend; y-axis trimmed to label range)
 plot_acc_scatter <- function(data, x_var, color_var, palette,
                              x_label, y_label, color_title,
                              x_breaks = NULL, x_limits = NULL) {
-  r2_sub <- format_r2(data, x_var, "response_plot", color_var, names(palette))
+  r2_sub    <- format_r2(data, x_var, "response_plot", color_var, names(palette))
+  pred_data <- compute_lme_predictions(data, x_var, "response_plot", color_var)
   ggplot(data, aes(x = .data[[x_var]], y = response_plot,
                    color = .data[[color_var]])) +
     annotate("rect", xmin = -Inf, xmax = Inf,
@@ -430,13 +467,16 @@ plot_acc_scatter <- function(data, x_var, color_var, palette,
     geom_hline(yintercept = -0.1,
                linetype = "dashed", color = "grey50", linewidth = 0.3) +
     geom_jitter(alpha = 0.35, size = 0.8, width = 0.05) +
-    geom_smooth(
-      aes(fill = .data[[color_var]]),
-      method    = "lm",
-      formula   = y ~ x,
-      se        = TRUE,
-      alpha     = 0.15,
-      linewidth = 0.7
+    geom_ribbon(
+      data = pred_data,
+      aes(x = .data[[x_var]], ymin = lower, ymax = upper,
+          fill = .data[[color_var]]),
+      alpha = 0.15, inherit.aes = FALSE
+    ) +
+    geom_line(
+      data = pred_data,
+      aes(x = .data[[x_var]], y = fit, color = .data[[color_var]]),
+      linewidth = 0.7, inherit.aes = FALSE
     ) +
     scale_color_manual(values = palette, name = color_title) +
     scale_fill_manual(values = palette, guide = "none") +
