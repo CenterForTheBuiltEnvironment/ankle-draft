@@ -1224,6 +1224,8 @@ m_glmm_unexposed <- glmer(
 
 summary(m_glmm_exposed)
 summary(m_glmm_unexposed)
+performance::r2_nakagawa(m_glmm_exposed)
+performance::r2_nakagawa(m_glmm_unexposed)
 
 # 2. extract coefficients
 fe_exposed <- fixef(m_glmm_exposed)
