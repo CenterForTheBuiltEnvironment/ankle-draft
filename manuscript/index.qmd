@@ -62,38 +62,37 @@ source(here::here("src", "R", "x_analysis.R"))
 
 # Abstract {.unnumbered}
 
-The ankle draft model incorporated in ASHRAE Standard 55 was derived
-from studies in which participants mainly wore summer clothing with
-exposed ankles (\~0.5 clo), potentially leading to overly conservative
-perimeter heating or facade insulation requirements in winter conditions
-where occupants typically wear long trousers, socks, and closed-toe
-shoes (\~0.75 clo). This study evaluated thermal comfort responses to
-ankle-level draft under such winter clothing conditions through
-controlled laboratory experiments with 51 participants. Using a
-within-subjects repeated-measures design, we exposed participants to
-nine conditions varying in ankle-level air temperature (17-20°C) and air
-speed (0.1–0.7 m/s), simulating window downdraft while they wore
-clothing ensembles targeting 0.75 clo.
+The ankle draft model in ASHRAE Standard 55 was derived from studies
+where participants mainly wore summer clothing with exposed ankles
+(\~0.5 clo), potentially leading to overly conservative perimeter
+heating or facade insulation requirements in winter conditions where
+occupants typically wear long trousers, socks, and closed-toe shoes
+(\~0.75 clo). We evaluated thermal comfort responses to ankle-level
+draft under these conditions in controlled laboratory experiments with
+51 participants. In a within-subjects repeated-measures design,
+participants were exposed to nine conditions varying in ankle-level air
+temperature (17–20°C) and air speed (0.1–0.7 m/s), simulating window
+downdraft while wearing 0.75-clo clothing ensembles.
 
 The existing ankle draft model systematically overpredicted
 dissatisfaction across all conditions. While prior studies with exposed
-ankles reported dissatisfaction rates of 23–57%, we observed rates of
-only 6–20%, with the existing model overestimating dissatisfaction by an
-average of 2.8 times and by as much as 39% at high air speeds. We fit
-generalized linear mixed-effects models to data from this study and
-prior research, developing separate prediction equations for
-ankle-covered and ankle-uncovered conditions. The covered-ankle model
-exhibited both a lower baseline dissatisfaction risk and reduced
-sensitivity to air speed. Whole-body thermal sensation and ankle-level
-air speed were the only significant predictors; ankle air temperature
-and room temperature were not significant within the tested ranges.
+ankles reported dissatisfaction rates of 23–57%, we observed only 6–20%,
+with the existing model overestimating by an average of 2.8 times and by
+as much as 39% at high air speeds. We fit generalized linear
+mixed-effects models to data from this study and prior research,
+developing separate prediction equations for ankle-covered and
+ankle-uncovered conditions. The covered-ankle model showed lower
+baseline dissatisfaction risk and reduced sensitivity to air speed.
+Whole-body thermal sensation and ankle-level air speed were the only
+significant predictors; ankle air temperature and room temperature were
+non-significant within tested ranges.
 
 These findings support differentiating ASHRAE Standard 55 ankle draft
 criteria by clothing insulation level. Adopting a covered-ankle
-criterion for winter heating scenarios will enable meaningful reductions
-in perimeter heating and facade insulation requirements without
-compromising occupant comfort, with associated benefits for installation
-costs, energy use, and carbon emissions.
+criterion for winter scenarios will enable meaningful reductions in
+perimeter heating and facade insulation requirements without
+compromising occupant comfort, with benefits for installation costs,
+energy use, and carbon emissions.
 
 # Keywords {.unnumbered}
 
@@ -583,8 +582,8 @@ groups, with steeper slopes at medium and high air speeds (b ≈
 `r round(max(lme_stats_d |> dplyr::filter(outcome == "thermal_sensation_overall", x_var == "t_supply_c", group %in% c("medium", "high")) |> dplyr::pull(slope)), 2)`
 per °C) than at low air speed (b ≈
 `r round(lme_stats_d |> dplyr::filter(outcome == "thermal_sensation_overall", x_var == "t_supply_c", group == "low") |> dplyr::pull(slope), 2)`
-per °C); however, ankle-level air temperature explained limited variance
-across all groups (R² ≤
+per °C); however, ankle-level air temperature explained no variance
+[@fergusonEffectSizePrimer2009] across all groups (R² ≤
 `r round(max(lme_stats_d |> dplyr::filter(outcome == "thermal_sensation_overall", x_var == "t_supply_c") |> dplyr::pull(r2)), 2)`).
 No systematic relationship was observed between whole-body thermal
 sensation and ankle air speed, consistent with ankle-level airflow
@@ -633,8 +632,9 @@ acceptability_by_sat <- thermal_acceptability_summary %>%
 @fig-thermal-acceptability-overall shows whole-body thermal
 acceptability plotted against ankle air temperature and air speed.
 Responses were predominantly on the acceptable side of the scale across
-all conditions. No strong linear relationship was found between thermal
-acceptability and either ankle-level air temperature or air speed (R² ≤
+all conditions. No practically relevant linear relationship was found
+between thermal acceptability and either ankle-level air temperature or
+air speed (R² ≤
 `r round(max(lme_stats_d |> dplyr::filter(outcome == "thermal_acceptability_overall") |> dplyr::pull(r2)), 3)`
 in all groups), indicating that the range of conditions tested did not
 substantially compromise whole-body thermal comfort (see Appendix A for
@@ -753,8 +753,8 @@ negligible for the low and high air speed groups (b ≈
 `r round(mean(lme_stats_d |> dplyr::filter(outcome == "air_movement_acceptability", x_var == "t_supply_c", group %in% c("low", "high")) |> dplyr::pull(slope)), 2)`)
 and modest for the medium group (b ≈
 `r round(lme_stats_d |> dplyr::filter(outcome == "air_movement_acceptability", x_var == "t_supply_c", group == "medium") |> dplyr::pull(slope), 2)`).
-Linear regression explained a small proportion of variance in all groups
-(R² ≤
+Linear regression explained a negligible [@fergusonEffectSizePrimer2009]
+proportion of variance in all groups (R² ≤
 `r round(max(lme_stats_d |> dplyr::filter(outcome == "air_movement_acceptability") |> dplyr::pull(r2)), 3)`),
 indicating substantial individual variability in acceptability ratings
 (see Appendix A for response distributions).
@@ -840,10 +840,10 @@ skin temperature reduction increased with air speed, as medium and high
 air speeds produced greater local cooling than low air speed across all
 three ankle-level air temperatures.
 
-Statistical analysis with BH correction showed that the differences in
-cooling response between low and medium air speeds, and between low and
-high air speeds, were significant at all ankle-level air temperatures,
-with maximum adjusted p-values of
+Statistical analysis with Benjamini-Hochberg correction showed that the
+differences in cooling response between low and medium air speeds, and
+between low and high air speeds, were significant at all ankle-level air
+temperatures, with maximum adjusted p-values of
 `r format_p_threshold(tsk_delta_sig_low_med_max_p)` and
 `r format_p_threshold(tsk_delta_sig_low_high_max_p)`, respectively. In
 contrast, the difference between medium and high air speeds reached
@@ -851,7 +851,7 @@ significance only at `r tsk_delta_sig_med_high`
 (`r sprintf("p_adj = %.3f", tsk_delta_sig_med_high_p)`). These findings
 indicate that increasing local airflow increases the short-term cooling
 response of the ankle skin and most noticeable temperature drops occur
-when shifting away from the lowest air speed setting.
+when shifting away from the lowest ai
 
 ![Time course of ankle skin temperature during the formal exposure phase
 across the nine experimental conditions for (a) absolute skin
@@ -1215,13 +1215,12 @@ comparable air speed and temperature conditions.
 These findings align with other research on the protective effects of
 lower-body coverage. @zhouDraughtSensationAssessment2022 reported that
 high-top shoes increased ankle airflow acceptability by approximately
-15% in stratified heating environments, demonstrating that even partial
-ankle coverage meaningfully reduces sensitivity to local airflow.
-Similarly, @toftumDraughtSensitivityInfluenced1996 found that occupants
-with cooler overall thermal sensations are more likely to perceive
-airflow as uncomfortable, and that higher clothing insulation attenuates
-the interaction between ambient temperature and airflow-induced
-discomfort.
+15% in stratified environments, demonstrating that even partial ankle
+coverage meaningfully reduces sensitivity to local airflow. Similarly,
+@toftumDraughtSensitivityInfluenced1996 found that occupants with cooler
+overall thermal sensations are more likely to perceive airflow as
+uncomfortable, and that higher clothing insulation attenuates the
+interaction between ambient temperature and airflow-induced discomfort.
 
 The limited variance explained by the fixed-effect predictors in the
 mixed-effects regression models shown in @fig-thermal-sensation-ankle
@@ -1234,7 +1233,7 @@ observed for ankle-level thermal sensation versus air speed at 17–18°C
 @liuPredictedPercentageDissatisfied2017 reported an R² of 0.10 for ankle
 air movement acceptability versus air speed alone, and an adjusted R² of
 0.22 for a model including both whole-body thermal sensation and ankle
-air speed — substantially higher than our values and consistent with the
+air speed, substantially higher than our values and consistent with the
 greater sensitivity to ankle draft expected under summer clothing
 conditions with exposed ankles.
 
@@ -1352,8 +1351,8 @@ evaluating spaces where occupants are likely to have exposed ankles, and
 apply the covered-ankle model for winter heating scenarios where long
 trousers, socks, and closed-toe shoes are expected. Within the
 near-neutral thermal range where ASHRAE Standard 55 applies, PMV
-provides a reasonable proxy for whole-body thermal sensation during
-design evaluation.
+provides the best available proxy for whole-body thermal sensation
+during design eva
 
 The practical benefits are significant. Perimeter heating systems,
 increased façade insulation and other techniques used to reduce the
@@ -1489,7 +1488,7 @@ agencies, and utilities.
 The datasets generated and analyzed during the current study as well as
 the full source code of the data analysis workflow are available in the
 following GitHub repository:
-<https://github.com/CenterForTheBuiltEnvironment/ankle-draft-II>
+[https://github.com/CenterForTheBuiltEnvironment/ankle-draft](https://github.com/CenterForTheBuiltEnvironment/ankle-draft-II){.uri}
 
 # Declaration of Generative AI and AI-assisted technologies in the writing process {.unnumbered}
 

@@ -436,11 +436,11 @@ plot_scatter_lm <- function(data, x_var, y_var, color_var, palette,
       axis.title.x         = element_text(margin = margin(t = 6)),
       legend.position      = "top",
       legend.direction     = "horizontal",
-      legend.title         = element_text(size = 6),
-      legend.text          = element_text(size = 6),
+      legend.title         = element_text(size = 7),
+      legend.text          = element_text(size = 7),
       legend.key.size      = unit(3, "mm"),
       legend.key           = element_blank(),
-      plot.subtitle        = element_text(size = 5, hjust = 0.5, color = "grey40",
+      plot.subtitle        = element_text(size = 7, hjust = 0.5, color = "grey40",
                                           margin = margin(t = 0, b = 1, unit = "mm"))
     )
 }
@@ -502,11 +502,11 @@ plot_acc_scatter <- function(data, x_var, color_var, palette,
       axis.title.x      = element_text(margin = margin(t = 6)),
       legend.position   = "top",
       legend.direction  = "horizontal",
-      legend.title      = element_text(size = 6),
-      legend.text       = element_text(size = 6),
+      legend.title      = element_text(size = 7),
+      legend.text       = element_text(size = 7),
       legend.key.size   = unit(3, "mm"),
       legend.key        = element_blank(),
-      plot.subtitle     = element_text(size = 5, hjust = 0.5, color = "grey40",
+      plot.subtitle     = element_text(size = 7, hjust = 0.5, color = "grey40",
                                        margin = margin(t = 0, b = 1, unit = "mm"))
     )
 }
