@@ -522,7 +522,6 @@ patchwork_theme <- list(
   plot_annotation(tag_levels = "a", tag_suffix = "."),
   theme(
     plot.tag      = element_text(size = 7, face = "bold"),
-    plot.margin   = margin(b = 5, unit = "mm"),
     axis.title    = element_text(margin = margin(r = 2, unit = "mm")),
     legend.margin = margin(l = 3, unit = "mm")
   )

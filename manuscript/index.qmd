@@ -117,7 +117,7 @@ ASHRAE Standard 55
 
 ![Graphical
 abstract.](figs/graphical-abstract.png){#fig-graphical-abstract
-width="75%"}
+width="100%"}
 
 # Introduction
 
