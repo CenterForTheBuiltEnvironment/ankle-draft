@@ -64,7 +64,7 @@ source(here::here("src", "R", "x_analysis.R"))
 
 The ankle draft model in ASHRAE Standard 55 was derived from studies
 where participants mainly wore summer clothing with exposed ankles
-(\~0.5 clo), potentially leading to overly conservative perimeter
+(\~0.6 clo), potentially leading to overly conservative perimeter
 heating or facade insulation requirements in winter conditions where
 occupants typically wear long trousers, socks, and closed-toe shoes
 (\~0.75 clo). We evaluated thermal comfort responses to ankle-level
@@ -72,27 +72,27 @@ draft under these conditions in controlled laboratory experiments with
 51 participants. In a within-subjects repeated-measures design,
 participants were exposed to nine conditions varying in ankle-level air
 temperature (17–20°C) and air speed (0.1–0.7 m/s), simulating window
-downdraft while wearing 0.75-clo clothing ensembles.
+downdraft.
 
 The existing ankle draft model systematically overpredicted
 dissatisfaction across all conditions. While prior studies with exposed
 ankles reported dissatisfaction rates of 23–57%, we observed only 6–20%,
-with the existing model overestimating by an average of 2.8 times and by
-as much as 39% at high air speeds. We fit generalized linear
-mixed-effects models to data from this study and prior research,
-developing separate prediction equations for ankle-covered and
-ankle-uncovered conditions. The covered-ankle model showed lower
-baseline dissatisfaction risk and reduced sensitivity to air speed.
-Whole-body thermal sensation and ankle-level air speed were the only
-significant predictors; ankle air temperature and room temperature were
-non-significant within tested ranges.
+with the existing model overestimating by an average of 2.3 times and by
+as much as 30% at high air speeds. We developed separate generalized
+linear mixed-effects models for covered- and uncovered-ankle conditions
+from this and prior studies. The covered-ankle model showed lower
+baseline dissatisfaction risk and reduced sensitivity to air speed. Only
+whole-body thermal sensation and ankle-level air speed were significant
+predictors; ankle air temperature and room temperature were
+non-significant within tested ranges. These results are subject to a
+20-minute exposure duration and the exclusion of radiant asymmetry from
+cold window surfaces.
 
 These findings support differentiating ASHRAE Standard 55 ankle draft
-criteria by clothing insulation level. Adopting a covered-ankle
-criterion for winter scenarios will enable meaningful reductions in
-perimeter heating and facade insulation requirements without
-compromising occupant comfort, with benefits for installation costs,
-energy use, and carbon emissions.
+criteria by clothing level. Adopting a covered-ankle criterion could
+enable meaningful reductions in perimeter heating and facade insulation
+without compromising occupant comfort, with benefits for energy use and
+carbon emissions.
 
 # Keywords {.unnumbered}
 
@@ -101,8 +101,8 @@ ASHRAE Standard 55
 
 # Highlights {.unnumbered}
 
--   Existing ankle draft model overpredicts dissatisfaction by a factor
-    of 2.8 under winter clothing
+-   Existing ankle draft model overpredicts dissatisfaction 2.8× under
+    winter clothing
 -   Covered-ankle dissatisfaction ranged 6–20% vs. 23–57% for exposed
     ankles
 -   New covered-ankle model shows lower baseline risk and reduced air
@@ -147,7 +147,7 @@ incorporated into ASHRAE Standard 55 [@ashraeANSIASHRAEStandard2023].
 Importantly, the 110 participants in these foundational studies,
 including an earlier investigation by
 @schiavonSensationDraftUncovered2016, wore summer clothing with exposed
-ankles, resulting in clothing insulation levels of approximately 0.5
+ankles, resulting in clothing insulation levels of approximately 0.6
 clo.
 
 However, building occupants in winter typically wear substantially
@@ -1352,7 +1352,7 @@ apply the covered-ankle model for winter heating scenarios where long
 trousers, socks, and closed-toe shoes are expected. Within the
 near-neutral thermal range where ASHRAE Standard 55 applies, PMV
 provides the best available proxy for whole-body thermal sensation
-during design eva
+during design evaluation.
 
 The practical benefits are significant. Perimeter heating systems,
 increased façade insulation and other techniques used to reduce the

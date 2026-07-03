@@ -124,13 +124,15 @@ env_airflow <- env_sessions %>%
   ) %>%
   dplyr::group_by(session_sat) %>%
   dplyr::summarise(
-    # Two decimal places
+    # Air speed: two decimal places (m/s)
     across(
-      .cols = c(
-        low_v_air_s, med_v_air_s, high_v_air_s,
-        low_turbulence_intensity, med_turbulence_intensity, high_turbulence_intensity
-      ),
+      .cols = c(low_v_air_s, med_v_air_s, high_v_air_s),
       .fns = \(x) paste0(round(mean(x, na.rm = TRUE), 2), " ( ± ", round(sd(x, na.rm = TRUE), 2), ")")
+    ),
+    # Turbulence intensity: one decimal place, converted from fraction to %
+    across(
+      .cols = c(low_turbulence_intensity, med_turbulence_intensity, high_turbulence_intensity),
+      .fns = \(x) paste0(round(mean(x, na.rm = TRUE) * 100, 1), " ( ± ", round(sd(x, na.rm = TRUE) * 100, 1), ")")
     ),
     # One decimal place
     across(
@@ -1650,9 +1652,10 @@ tsk_delta_extrapolation_p <- ggplot() +
     y = expression(Delta * "Skin temperature from baseline (" * degree * "C)"),
     color = "Air speed"
   ) +
-  theme_minimal(base_size = 7) +
+  theme_minimal(base_size = 8) +
   theme(
     panel.grid.minor = element_blank(),
+    axis.text = element_text(size = 8),
     legend.position = "top",
     strip.text = element_text()
   )
@@ -1671,7 +1674,7 @@ tsk_p <- (tsk_timecourse_p / tsk_timecourse_delta_p) +
   plot_annotation(tag_levels = "a", tag_suffix = ".") &
   theme(
     plot.subtitle = element_text(hjust = 0.05, margin = margin(b = 3, unit = "mm")),
-    plot.tag = element_text(size = 7, face = "bold"),
+    plot.tag = element_text(size = 8, face = "bold"),
     plot.margin = margin(b = 5, unit = "mm"),
     axis.title = element_text(margin = margin(r = 2, unit = "mm")),
     legend.margin = margin(l = 3, unit = "mm")
