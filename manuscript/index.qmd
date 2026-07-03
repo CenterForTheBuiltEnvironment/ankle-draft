@@ -270,9 +270,12 @@ In addition, we continuously recorded participants' skin temperature on
 the lateral lower leg (mid-calf) and feet using iButton sensors
 (Thermochron, Maxim Integrated, USA, Type DS1923; measurement range:
 20°C to 85°C; accuracy: ±0.5°C; resolution: 0.0625°C) attached with
-medical-grade hypoallergenic tape. We used the skin temperature data to
-assess local cooling responses and as physiological correlates of
-subjective thermal sensation.
+medical-grade hypoallergenic tape. These sites were selected as the most
+practical iButton attachment locations in the lower extremity,
+bracketing the ankle region; direct placement at the ankle was not
+feasible due to the bony lateral malleolus. We used the skin temperature
+data to assess local cooling responses and as physiological correlates
+of subjective thermal sensation.
 
 ### Subjective feedback {#sec-subjective-feedback}
 
@@ -335,8 +338,14 @@ rolling sleeves), and any changes were recorded.
 
 Following adaptation, participants were exposed to three consecutive
 20-minute conditions at different air speed levels, with 20-minute rest
-periods between conditions (see @fig-setup). The sequence of air speed
-conditions was counterbalanced across participants and sessions. At the
+periods between conditions (see @fig-setup). The 20-minute exposure
+duration was selected to match the protocol used in the foundational
+ankle draft studies [@liuPredictedPercentageDissatisfied2017;
+@schiavonSensationDraftUncovered2016], enabling direct comparison of
+results, and exceeds the 15-minute evaluation period specified in ASHRAE
+Standard 55 for assessing local thermal discomfort
+[@ashraeANSIASHRAEStandard2023]. The sequence of air speed conditions
+was counterbalanced across participants and sessions. At the
 end of each exposure and adaptation interval, participants completed the
 standardized questionnaires listed in @sec-subjective-feedback.
 
@@ -831,10 +840,11 @@ format_p_threshold <- function(p) {
 }
 ```
 
-@fig-tsk illustrates the progression of ankle skin temperatures
+@fig-tsk illustrates the progression of lower-leg skin temperatures
 throughout the exposure period. Using the pre-exposure adaptation period
-as a baseline, ankle skin temperatures decreased under all conditions,
-with final changes ranging from `r tsk_delta_last1_range$min_val`°C to
+as a baseline, lower-leg skin temperatures decreased under all
+conditions, with final changes ranging from
+`r tsk_delta_last1_range$min_val`°C to
 `r tsk_delta_last1_range$max_val`°C. In general, the magnitude of this
 skin temperature reduction increased with air speed, as medium and high
 air speeds produced greater local cooling than low air speed across all
@@ -850,11 +860,11 @@ contrast, the difference between medium and high air speeds reached
 significance only at `r tsk_delta_sig_med_high`
 (`r sprintf("p_adj = %.3f", tsk_delta_sig_med_high_p)`). These findings
 indicate that increasing local airflow increases the short-term cooling
-response of the ankle skin and most noticeable temperature drops occur
-when shifting away from the lowest ai
+response of the lower-leg skin and most noticeable temperature drops
+occur when shifting away from the lowest ai
 
-![Time course of ankle skin temperature during the formal exposure phase
-across the nine experimental conditions for (a) absolute skin
+![Time course of lower-leg skin temperature during the formal exposure
+phase across the nine experimental conditions for (a) absolute skin
 temperature and (b) change relative to the adaptation-period baseline (
 Shaded bands denote the between-subject mean ± 1 SD): Local cooling
 intensified as air speed increased, with the most significant
@@ -872,26 +882,30 @@ tsk_delta_extrapolation_range <- tsk_delta_exponential_fits %>%
   )
 ```
 
-It should be noted that ankle skin temperature had not fully stabilized
-by the end of the 20 min exposure. To estimate the potential effect of
-exposure duration on the results, we further fitted an exponential
-regression model to the measured skin temperature changes during the
-first 20 min and extrapolated the fitted trend from 20 to 90 min, as
-shown in @fig-tsk-delta-extrapolation. The results indicate that ankle
-skin temperature would continue to decrease after 20 min, with an
+It should be noted that lower-leg skin temperature had not fully
+stabilized by the end of the 20 min exposure. To estimate the potential
+effect of exposure duration on the results, we further fitted an
+exponential regression model to the measured skin temperature changes
+during the first 20 min and extrapolated the fitted trend from 20 to 90
+min, as shown in @fig-tsk-delta-extrapolation. The results indicate that
+lower-leg skin temperature would continue to decrease after 20 min, with an
 additional reduction of approximately
 `r tsk_delta_extrapolation_range$min_val`–`r tsk_delta_extrapolation_range$max_val`
 °C between 20 and 90 min before stabilizing. This extrapolation was
 broadly consistent with simulations from the Advanced Berkeley Comfort
 (ABC) model [@ABCHuizenga2001] under the same experimental conditions,
-which predicted an additional ankle skin temperature decrease of
+which predicted an additional lower-leg skin temperature decrease of
 approximately 0.3–0.7 °C. The corresponding changes in both local and
 whole-body thermal sensation were below 0.3 on the TSV scale predicted
-by ABC model. Therefore, although ankle skin temperature had not fully
-stabilized, the use of a 20 min exposure duration is expected to have a
-limited influence on this study’s main findings.
+by ABC model. Therefore, although lower-leg skin temperature had not fully stabilized,
+the projected additional cooling is modest and the main conclusions are
+unlikely to be substantially altered by longer exposure durations.
+Nevertheless, the effect on subjective dissatisfaction beyond 20 minutes
+cannot be directly assessed from the current data, and dissatisfaction
+rates under prolonged real-office exposure may be somewhat higher than
+those reported here.
 
-![Estimated ankle skin temperature changes across experimental
+![Estimated lower-leg skin temperature changes across experimental
 conditions. Solid lines show measured mean values during the first 20
 min, and dashed lines show exponential extrapolations from 20 to 90
 min.](figs/tsk_delta_extrapolation_p.png){#fig-tsk-delta-extrapolation
@@ -1195,7 +1209,14 @@ cat("$$\n", model_covered$formula_text_expanded, "\n$$\n", sep = "")
 
 Where, $PPD_{AD}$ is the predicted percentage dissatisfied with ankle
 draft, $V$ is air speed at ankle (m/s), and $TS$ is whole-body thermal
-sensation.
+sensation. Consistent with the PPD framework established by
+@fangerThermalComfortAnalysis1970 and adopted in ASHRAE Standard 55,
+the models are intended to predict population-average responses — that
+is, the expected proportion of occupants dissatisfied under given
+conditions — rather than the thermal response of any individual
+occupant. The substantial inter-individual variability evident in
+Figures 3–6 is expected and is accounted for in the mixed-effects model
+structure through the random subject intercept.
 
 # Discussion
 
@@ -1269,14 +1290,14 @@ the reduced sensitivity to ankle draft under winter clothing conditions.
 From a physiological perspective, the skin temperature results indicate
 that winter clothing attenuates, though does not eliminate, the local
 cooling effect of airflow. During the final steady-state period,
-significant reductions in ankle skin temperature occurred only at the
-coolest ankle-level air temperature condition (17–18°C), where medium
-and high air speeds produced lower skin temperatures than the low-speed
-condition. At 18–19°C and 19–20°C, variations in air speed did not yield
-significant differences in steady-state skin temperature, and no
-significant differences were observed between medium and high air speeds
-at any ankle-level air temperature condition. These findings suggest
-that detectable local cooling requires a sufficiently large
+significant reductions in lower-leg skin temperature occurred only at
+the coolest ankle-level air temperature condition (17–18°C), where
+medium and high air speeds produced lower skin temperatures than the
+low-speed condition. At 18–19°C and 19–20°C, variations in air speed did
+not yield significant differences in steady-state skin temperature, and
+no significant differences were observed between medium and high air
+speeds at any ankle-level air temperature condition. These findings
+suggest that detectable local cooling requires a sufficiently large
 environmental contrast.
 
 Thermal sensation changes are more closely associated with rapid
@@ -1352,7 +1373,11 @@ apply the covered-ankle model for winter heating scenarios where long
 trousers, socks, and closed-toe shoes are expected. Within the
 near-neutral thermal range where ASHRAE Standard 55 applies, PMV
 provides the best available proxy for whole-body thermal sensation
-during design evaluation.
+during design evaluation. These implications relate specifically to the
+convective ankle draft component; radiant asymmetry from cold glazing,
+governed by a separate criterion in ASHRAE Standard 55 (Section 5.3),
+should be evaluated independently and may independently necessitate
+perimeter heating near large or poorly insulated windows.
 
 The practical benefits are significant. Perimeter heating systems,
 increased façade insulation and other techniques used to reduce the
@@ -1362,6 +1387,14 @@ evaluated separately, designers may be able to downsize or remove
 solutions used to manage the problem. This approach could yield
 meaningful reductions in first costs, energy consumption, and associated
 carbon emissions while maintaining occupant comfort.
+
+It should also be noted that the proposed models are not limited to
+window downdraft scenarios: since the inputs are ankle-level air speed,
+air temperature, and whole-body thermal sensation — all directly
+measurable quantities — the models are equally applicable to other
+low-velocity air distribution strategies producing similar ankle-level
+conditions, including underfloor air distribution and displacement
+ventilation systems.
 
 ## Limitations
 
@@ -1447,8 +1480,8 @@ turbulence intensity were not significant within the tested ranges.
 This reduced sensitivity under winter clothing appears to stem from a
 combination of physiological mechanisms and potentially psychological
 factors. Physiologically, increased thermal resistance from clothing
-coverage likely attenuated the effect of local cooling, with ankle skin
-temperature decreasing by 0.8°C to 1.7°C across all experimental
+coverage likely attenuated the effect of local cooling, with lower-leg
+skin temperature decreasing by 0.8°C to 1.7°C across all experimental
 conditions. Psychologically, perceived protection from clothing may also
 have contributed to the reduced sensitivity.
 
