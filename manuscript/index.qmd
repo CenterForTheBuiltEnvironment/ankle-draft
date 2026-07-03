@@ -345,8 +345,8 @@ ankle draft studies [@liuPredictedPercentageDissatisfied2017;
 results, and exceeds the 15-minute evaluation period specified in ASHRAE
 Standard 55 for assessing local thermal discomfort
 [@ashraeANSIASHRAEStandard2023]. The sequence of air speed conditions
-was counterbalanced across participants and sessions. At the
-end of each exposure and adaptation interval, participants completed the
+was counterbalanced across participants and sessions. At the end of each
+exposure and adaptation interval, participants completed the
 standardized questionnaires listed in @sec-subjective-feedback.
 
 ## Statistical analysis
@@ -469,13 +469,32 @@ agreement between the closed-form approximation and the Monte
 Carlo-based marginal predictions. Details of this procedure are provided
 in Appendix B.
 
+### Sample size and statistical power
+
+We conducted a simulation-based power analysis to assess whether our
+sample of 51 participants was statistically adequate to detect the
+primary effect of ankle air speed on draft dissatisfaction. Because no
+prior data existed for the covered-ankle condition, we used the GLMM
+fitted to the 88 exposed-ankle participants from
+@liuPredictedPercentageDissatisfied2017 as a conservative reference: the
+effect of air speed on dissatisfaction is expected to be smaller when
+ankles are covered, so demonstrating adequate power for the larger
+exposed-ankle effect constitutes a lower bound on power for our
+covered-ankle comparison. Using the `simr` package [@greenMacleod2016],
+we simulated 1,000 datasets at each of seven sample sizes ranging from
+10 to 88 and estimated the proportion of simulations in which the fixed
+effect of ankle air speed was detected at α = 0.05. Power reached 80% at
+N = 30 participants (95% CI: 79.9–84.7%), confirming that our sample of
+51 provided adequate statistical power.
+
 ## Software and data
 
 We performed all data processing, statistical analyses, and model
 fitting in R (version 4.4.1). The main packages we used were tidyverse
-(version 2.0.0), lme4 (version 2.0.1), rstatix (version 0.7.3), and
-CalibrationCurves (version 3.0.0). Data and analysis code are available
-on: https://github.com/CenterForTheBuiltEnvironment/ankle-draft
+(version 2.0.0), lme4 (version 2.0.1), rstatix (version 0.7.3),
+CalibrationCurves (version 3.0.0), and simr (version 1.0.6). Data and
+analysis code are available on:
+https://github.com/CenterForTheBuiltEnvironment/ankle-draft
 
 # Results {#sec-results}
 
@@ -888,8 +907,8 @@ effect of exposure duration on the results, we further fitted an
 exponential regression model to the measured skin temperature changes
 during the first 20 min and extrapolated the fitted trend from 20 to 90
 min, as shown in @fig-tsk-delta-extrapolation. The results indicate that
-lower-leg skin temperature would continue to decrease after 20 min, with an
-additional reduction of approximately
+lower-leg skin temperature would continue to decrease after 20 min, with
+an additional reduction of approximately
 `r tsk_delta_extrapolation_range$min_val`–`r tsk_delta_extrapolation_range$max_val`
 °C between 20 and 90 min before stabilizing. This extrapolation was
 broadly consistent with simulations from the Advanced Berkeley Comfort
@@ -897,13 +916,13 @@ broadly consistent with simulations from the Advanced Berkeley Comfort
 which predicted an additional lower-leg skin temperature decrease of
 approximately 0.3–0.7 °C. The corresponding changes in both local and
 whole-body thermal sensation were below 0.3 on the TSV scale predicted
-by ABC model. Therefore, although lower-leg skin temperature had not fully stabilized,
-the projected additional cooling is modest and the main conclusions are
-unlikely to be substantially altered by longer exposure durations.
-Nevertheless, the effect on subjective dissatisfaction beyond 20 minutes
-cannot be directly assessed from the current data, and dissatisfaction
-rates under prolonged real-office exposure may be somewhat higher than
-those reported here.
+by ABC model. Therefore, although lower-leg skin temperature had not
+fully stabilized, the projected additional cooling is modest and the
+main conclusions are unlikely to be substantially altered by longer
+exposure durations. Nevertheless, the effect on subjective
+dissatisfaction beyond 20 minutes cannot be directly assessed from the
+current data, and dissatisfaction rates under prolonged real-office
+exposure may be somewhat higher than those reported here.
 
 ![Estimated lower-leg skin temperature changes across experimental
 conditions. Solid lines show measured mean values during the first 20
@@ -1210,13 +1229,13 @@ cat("$$\n", model_covered$formula_text_expanded, "\n$$\n", sep = "")
 Where, $PPD_{AD}$ is the predicted percentage dissatisfied with ankle
 draft, $V$ is air speed at ankle (m/s), and $TS$ is whole-body thermal
 sensation. Consistent with the PPD framework established by
-@fangerThermalComfortAnalysis1970 and adopted in ASHRAE Standard 55,
-the models are intended to predict population-average responses — that
-is, the expected proportion of occupants dissatisfied under given
-conditions — rather than the thermal response of any individual
-occupant. The substantial inter-individual variability evident in
-Figures 3–6 is expected and is accounted for in the mixed-effects model
-structure through the random subject intercept.
+@fangerThermalComfortAnalysis1970 and adopted in ASHRAE Standard 55, the
+models are intended to predict population-average responses — that is,
+the expected proportion of occupants dissatisfied under given conditions
+— rather than the thermal response of any individual occupant. The
+substantial inter-individual variability evident in Figures 3–6 is
+expected and is accounted for in the mixed-effects model structure
+through the random subject intercept.
 
 # Discussion
 
