@@ -40,7 +40,7 @@ acceptability_levels <- c(
 
 # Demographic and experimental factors -----------------------------------------
 
-sex_levels <- c("female", "male", "third gender / other")
+gender_levels <- c("female", "male", "third gender / other")
 
 session_type_levels <- c("yosemite", "yellowstone", "sequoia")
 
@@ -55,7 +55,7 @@ workstation_labels <- c("adaptation", "low", "medium", "high")
 
 col_subjects <- readr::cols(
   subject_id = readr::col_character(),
-  gender = readr::col_factor(levels = sex_levels)
+  gender = readr::col_factor(levels = gender_levels)
 )
 
 col_sessions <- readr::cols(
