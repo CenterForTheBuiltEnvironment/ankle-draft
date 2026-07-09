@@ -69,7 +69,7 @@ new_model_c <- new_model %>%
 
 # 2. Fit reference model (Liu 2017, exposed ankles) ===========================
 
-liu_short_data <- new_model_c %>% dplyr::filter(clothing_type == "short")
+liu_short_data <- new_model_c %>% dplyr::filter(source == "liu")
 
 # Confirm subject count
 n_liu_short <- dplyr::n_distinct(liu_short_data$subject_id)
