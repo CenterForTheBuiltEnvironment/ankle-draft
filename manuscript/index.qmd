@@ -1185,7 +1185,8 @@ systematic differences between the datasets after controlling for the
 other predictors.
 
 We first fitted a model including all candidate predictors to the
-combined dataset observations (n = `r format(nobs(model_input), big.mark = ",")`), following the methods
+combined dataset observations (n =
+`r format(nobs(model_input), big.mark = ",")`), following the methods
 described in @sec-method-new-model. The result of the screening model is
 shown in @tbl-updated-model-screening. Ankle-level air speed, whole-body
 thermal sensation, and ankle coverage status (uncovered vs. covered)
