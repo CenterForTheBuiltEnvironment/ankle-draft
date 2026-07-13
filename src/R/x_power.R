@@ -69,11 +69,14 @@ new_model_c <- new_model %>%
 
 # 2. Fit reference model (Liu 2017, exposed ankles) ===========================
 
+# Filter to Liu subjects only. Liu's long-clothing subjects lack a valid
+# dissatisfied_with_draft_ankles value (NA after pivot_wider) and are
+# removed upstream, so this is effectively clothing_type == "short".
 liu_short_data <- new_model_c %>% dplyr::filter(source == "liu")
 
-# Confirm subject count
+# Confirm subject count (should be ~88 — Liu's exposed-ankle participants)
 n_liu_short <- dplyr::n_distinct(liu_short_data$subject_id)
-message("Liu short-clothing subjects: ", n_liu_short)  # expected ~88
+message("Liu reference-model subjects: ", n_liu_short)
 
 m_ref <- lme4::glmer(
   dissatisfied_with_draft_ankles ~ v_air_m_s + thermal_sensation + (1 | subject_id),

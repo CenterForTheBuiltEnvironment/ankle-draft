@@ -349,10 +349,10 @@ was counterbalanced across participants and sessions. At the end of each
 exposure and adaptation interval, participants completed the
 standardized questionnaires listed in @sec-subjective-feedback.
 
-Across the experiment, three participants completed six conditions and 
-another three completed three conditions for personal reasons. 
-One repeated trial resulting from an operational error was excluded, 
-leaving 431 observations for analysis.
+Across the experiment, three participants completed six conditions and
+another three completed three conditions for personal reasons. One
+repeated trial resulting from an operational error was excluded, leaving
+431 observations for analysis.
 
 ## Statistical analysis
 
@@ -447,10 +447,11 @@ The existing ankle draft risk model was developed only for summer
 conditions. To extend model applicability to broader boundary
 conditions, we modeled ankle draft dissatisfaction using both the
 dataset from this study and the dataset from
-@liuPredictedPercentageDissatisfied2017. The sample sizes included in the models are summarized in @tbl-model-datasets. 
-Because both experiments used repeated-measures designs, the observations were not independent. We
-therefore used a generalized linear mixed model with a binomial
-distribution and logit link.
+@liuPredictedPercentageDissatisfied2017. The sample sizes included in
+the models are summarized in @tbl-model-datasets. Because both
+experiments used repeated-measures designs, the observations were not
+independent. We therefore used a generalized linear mixed model with a
+binomial distribution and logit link.
 
 ```{r}
 #| label: tbl-model-datasets
@@ -539,7 +540,10 @@ knitr::kable(demographic_d,
 )
 
 ```
-* The Third Gender/Other category included one participant whose sex was male (23 years, 1.60 m, 73 kg) and two participants whose sex was female (22 years, 1.63 m, 68 kg; and 21 years, 1.60 m, 45 kg).
+
+-   The Third Gender/Other category included one participant whose sex
+    was male (23 years, 1.60 m, 73 kg) and two participants whose sex
+    was female (22 years, 1.63 m, 68 kg; and 21 years, 1.60 m, 45 kg).
 
 @tbl-demographics provides a summary of the demographic information
 collected from the study participants. Since the demographic data was
@@ -1174,20 +1178,21 @@ based on the initial variable screening procedure used by
 @liuPredictedPercentageDissatisfied2017. These included environmental
 factors, including ankle-level air speed, ankle-level air temperature,
 room air temperature, and ankle-level turbulence intensity. Based on the
-existing ankle draft risk model, we also included sex and whole-body thermal
-sensation. In addition, we included ankle coverage status to examine
-clothing influence, and data source to examine potential systematic
-differences between the datasets after controlling for the other
-predictors.
+existing ankle draft risk model, we also included sex and whole-body
+thermal sensation. In addition, we included ankle coverage status to
+examine clothing influence, and data source to examine potential
+systematic differences between the datasets after controlling for the
+other predictors.
 
-We first fitted a model including all candidate predictors to the combined dataset 
-observations (n = 1,847), following the methods described in @sec-method-new-model. 
-The result of the screening model is shown in @tbl-updated-model-screening. Ankle-level air speed,
-whole-body thermal sensation, and ankle coverage status (uncovered vs.
-covered) were significantly correlated with ankle draft dissatisfaction,
-whereas room air temperature, ankle-level air temperature, turbulence intensity, 
-and sex were not significant within the range investigated
-in this study. The data source was also not statistically significant,
+We first fitted a model including all candidate predictors to the
+combined dataset observations (n = `r format(nobs(model_input), big.mark = ",")`), following the methods
+described in @sec-method-new-model. The result of the screening model is
+shown in @tbl-updated-model-screening. Ankle-level air speed, whole-body
+thermal sensation, and ankle coverage status (uncovered vs. covered)
+were significantly correlated with ankle draft dissatisfaction, whereas
+room air temperature, ankle-level air temperature, turbulence intensity,
+and sex were not significant within the range investigated in this
+study. The data source was also not statistically significant,
 suggesting that no significant systematic difference remained between
 the two datasets after accounting for the measured predictors.
 
@@ -1271,10 +1276,11 @@ the expected proportion of occupants dissatisfied under given conditions
 — rather than the thermal response of any individual occupant. The
 substantial inter-individual variability evident in Figures 3–6 is
 expected and is accounted for in the mixed-effects model structure
-through the random subject intercept. In addition, the proposed model 
-was developed based on the experimental ranges covered by the present study and Liu‘s study. 
-Therefore, its application should account for the range of experimental 
-conditions represented in these datasets to avoid inappropriate extrapolation.
+through the random subject intercept. In addition, the proposed model
+was developed based on the experimental ranges covered by the present
+study and Liu‘s study. Therefore, its application should account for the
+range of experimental conditions represented in these datasets to avoid
+inappropriate extrapolation.
 
 # Discussion
 
@@ -1361,10 +1367,10 @@ environmental contrast.
 Thermal sensation changes are more closely associated with rapid
 variations in skin temperature than with absolute values
 [@ChoiInvestigationHumanBody2012; @KenshaloCoolThresholds1968]. In this
-study, ankle skin temperature variation relative to the baseline adaptation
-period showed significant differences between low and medium/high air
-speed conditions across all ankle-level air temperature conditions
-(effect size *d* ≈
+study, ankle skin temperature variation relative to the baseline
+adaptation period showed significant differences between low and
+medium/high air speed conditions across all ankle-level air temperature
+conditions (effect size *d* ≈
 `r tsk_delta_low_vs_higher_d_range$min_val`–`r tsk_delta_low_vs_higher_d_range$max_val`).
 Consistent with this, local ankle thermal sensation at medium and high
 speeds was significantly lower than at low speed under the 17–18°C
@@ -1528,7 +1534,8 @@ suggests that ankle coverage substantially reduces sensitivity to local
 draft, a conclusion supported by the covered-ankle model developed in
 this study; the model demonstrates both a lower baseline risk and a
 reduced response to air speed compared to uncovered-ankle models, with
-an intercept difference of `r sprintf("%.1f", abs(glmm_delta_intercept))` units on the logit scale.
+an intercept difference of
+`r sprintf("%.1f", abs(glmm_delta_intercept))` units on the logit scale.
 
 Consistent with prior model structures, we found that whole-body thermal
 sensation and air speed at the ankle are the primary predictors of
@@ -1598,7 +1605,9 @@ California, Berkeley supported this research.
 The following figures show the full response distributions for thermal
 sensation, thermal preference, and air movement acceptability and
 preference. These complement the scatter plots with mixed-effects
-regression lines presented in @sec-results in the main text. Table 7 summarizes the condition comparisons that showed statistically significant differences.
+regression lines presented in @sec-results in the main text.
+@tbl-supp-pairwise-perception summarizes the condition comparisons that
+showed statistically significant differences.
 
 ![Whole-body thermal sensation (a) and thermal preference (b) votes by
 ankle-level air temperature and air speed. Participants predominantly
