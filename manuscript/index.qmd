@@ -101,7 +101,7 @@ ASHRAE Standard 55
 
 # Highlights {.unnumbered}
 
--   Existing ankle draft model overpredicts dissatisfaction 2.8× under
+-   Existing ankle draft model overpredicts dissatisfaction 2.3× under
     winter clothing
 -   Covered-ankle dissatisfaction ranged 6–20% vs. 23–57% for exposed
     ankles
@@ -307,7 +307,7 @@ readr::read_csv("tables/survey_scales.csv") |>
 ## Participants
 
 We recruited
-`r demographic_d %>% dplyr::filter(sex == "All") %>% dplyr::pull(n)`
+`r demographic_d %>% dplyr::filter(gender == "All") %>% dplyr::pull(n)`
 participants from the university community and local area through the
 Experimental Social Science Laboratory (Xlab) platform and email
 outreach to individuals who had participated in previous studies and
@@ -348,6 +348,11 @@ Standard 55 for assessing local thermal discomfort
 was counterbalanced across participants and sessions. At the end of each
 exposure and adaptation interval, participants completed the
 standardized questionnaires listed in @sec-subjective-feedback.
+
+Across the experiment, three participants completed six conditions and 
+another three completed three conditions for personal reasons. 
+One repeated trial resulting from an operational error was excluded, 
+leaving 431 observations for analysis.
 
 ## Statistical analysis
 
@@ -442,10 +447,35 @@ The existing ankle draft risk model was developed only for summer
 conditions. To extend model applicability to broader boundary
 conditions, we modeled ankle draft dissatisfaction using both the
 dataset from this study and the dataset from
-@liuPredictedPercentageDissatisfied2017. Because both experiments used
-repeated-measures designs, the observations were not independent. We
+@liuPredictedPercentageDissatisfied2017. The sample sizes included in the models are summarized in @tbl-model-datasets. 
+Because both experiments used repeated-measures designs, the observations were not independent. We
 therefore used a generalized linear mixed model with a binomial
 distribution and logit link.
+
+```{r}
+#| label: tbl-model-datasets
+#| tbl-cap: "Datasets included in the development of the new ankle draft model."
+#| echo: false
+
+model_dataset_summary <- new_model_c %>%
+  dplyr::mutate(
+    dataset = dplyr::if_else(source == "toby", "Current study", "Liu et al. (2017)"),
+    ankle_coverage = dplyr::if_else(clothing_type == "long", "Covered", "Uncovered")
+  ) %>%
+  dplyr::group_by(dataset, ankle_coverage) %>%
+  dplyr::summarise(
+    subjects = dplyr::n_distinct(subject_id),
+    observations = dplyr::n(),
+    .groups = "drop"
+  ) %>%
+  dplyr::arrange(factor(dataset, levels = c("Current study", "Liu et al. (2017)")),
+                 factor(ankle_coverage, levels = c("Covered", "Uncovered")))
+
+knitr::kable(
+  model_dataset_summary,
+  col.names = c("Dataset", "Ankle coverage status", "Subjects", "Observations")
+)
+```
 
 Subject was included as a random intercept to account for
 between-subject heterogeneity and within-subject dependence arising from
@@ -494,7 +524,7 @@ fitting in R (version 4.4.1). The main packages we used were tidyverse
 (version 2.0.0), lme4 (version 2.0.1), rstatix (version 0.7.3),
 CalibrationCurves (version 3.0.0), and simr (version 1.0.6). Data and
 analysis code are available on:
-https://github.com/CenterForTheBuiltEnvironment/ankle-draft
+https://github.com/CenterForTheBuiltEnvironment/ankle-draft.
 
 # Results {#sec-results}
 
@@ -505,24 +535,25 @@ https://github.com/CenterForTheBuiltEnvironment/ankle-draft
 #| tbl-cap: "Summary of demographic information (median [IQR]) on study participants."
 
 knitr::kable(demographic_d,
-             col.names = c('Sex', 'No. Subjects', 'Age [a]', 'Height [m]', 'Weight [kg]', 'Body Mass Index (BMI)')
+             col.names = c('Gender', 'No. Subjects', 'Age [a]', 'Height [m]', 'Weight [kg]', 'Body Mass Index (BMI)')
 )
 
 ```
+* The Third Gender/Other category included one participant whose sex was male (23 years, 1.60 m, 73 kg) and two participants whose sex was female (22 years, 1.63 m, 68 kg; and 21 years, 1.60 m, 45 kg).
 
 @tbl-demographics provides a summary of the demographic information
 collected from the study participants. Since the demographic data was
 not uniformly distributed, we use the median and interquartile range
 (IQR) to describe the dataset. A total of
-`r demographic_d %>% dplyr::filter(sex == "All") %>% dplyr::pull(n)`
+`r demographic_d %>% dplyr::filter(gender == "All") %>% dplyr::pull(n)`
 subjects participated in the study
-(`r demographic_d %>% dplyr::filter(sex == "Female") %>% dplyr::pull(n)`
+(`r demographic_d %>% dplyr::filter(gender == "Female") %>% dplyr::pull(n)`
 female,
-`r demographic_d %>% dplyr::filter(sex == "Male") %>% dplyr::pull(n)`
+`r demographic_d %>% dplyr::filter(gender == "Male") %>% dplyr::pull(n)`
 male,
-`r demographic_d %>% dplyr::filter(sex == "Third Gender / Other") %>% dplyr::pull(n)`
+`r demographic_d %>% dplyr::filter(gender == "Third Gender / Other") %>% dplyr::pull(n)`
 other), with a median age of
-`r demographic_d %>% dplyr::filter(sex == "All") %>% dplyr::pull(age)`
+`r demographic_d %>% dplyr::filter(gender == "All") %>% dplyr::pull(age)`
 years.
 
 ```{r}
@@ -1022,12 +1053,13 @@ model_screening_table <- model_screening %>%
     term_label = dplyr::recode(
       term,
       "v_air_m_s" = "Air speed at ankle",
+      "sexmale" = "Sex (male vs. female [reference])",
       "t_air_c" = "Room air temperature",
       "t_supply_c" = "Air temperature at ankle",
       "thermal_sensation" = "Whole-body thermal sensation",
       "turbulence_intensity" = "Turbulence intensity",
-      "clothing_typeshort" = "Ankle coverage status (uncovered vs. covered)",
-      "sourcetoby" = "Data source (This study vs. Liu's summer dataset)"
+      "clothing_typeshort" = "Ankle coverage status (uncovered vs. covered [reference])",
+      "sourcetoby" = "Data source (This study vs. Liu's summer dataset [reference])"
     ),
     estimate_fmt = sprintf("%.2f", estimate),
     std_error_fmt = sprintf("%.2f", std_error),
@@ -1080,6 +1112,7 @@ extract_final_model_r2 <- function(mod, model_label) {
   r2 <- performance::r2_nakagawa(mod)
   tibble::tibble(
     model = model_label,
+    observations = stats::nobs(mod),
     marginal_r2 = sprintf("%.3f", r2$R2_marginal),
     conditional_r2 = sprintf("%.3f", r2$R2_conditional)
   )
@@ -1113,13 +1146,17 @@ model_final_table <- dplyr::bind_rows(
   dplyr::group_by(model) %>%
   dplyr::mutate(
     model_display = dplyr::if_else(dplyr::row_number() == 1, model, ""),
+    observations_display = dplyr::if_else(
+      dplyr::row_number() == 1, as.character(observations), ""
+    ),
     marginal_r2_display = dplyr::if_else(dplyr::row_number() == 1, marginal_r2, ""),
     conditional_r2_display = dplyr::if_else(dplyr::row_number() == 1, conditional_r2, "")
   ) %>%
   dplyr::ungroup() %>%
   dplyr::select(
-    model_display, term_label, estimate_fmt, std_error_fmt, z_value_fmt,
-    p_value_fmt, marginal_r2_display, conditional_r2_display
+    model_display, observations_display, term_label, estimate_fmt,
+    std_error_fmt, z_value_fmt, p_value_fmt, marginal_r2_display,
+    conditional_r2_display
   )
 ```
 
@@ -1137,19 +1174,19 @@ based on the initial variable screening procedure used by
 @liuPredictedPercentageDissatisfied2017. These included environmental
 factors, including ankle-level air speed, ankle-level air temperature,
 room air temperature, and ankle-level turbulence intensity. Based on the
-existing ankle draft risk model, we also included whole-body thermal
+existing ankle draft risk model, we also included sex and whole-body thermal
 sensation. In addition, we included ankle coverage status to examine
 clothing influence, and data source to examine potential systematic
 differences between the datasets after controlling for the other
 predictors.
 
-We first fitted a model including all candidate predictors following the
-methods described in @sec-method-new-model. The result of the screening
-model is shown in @tbl-updated-model-screening. Ankle-level air speed,
+We first fitted a model including all candidate predictors to the combined dataset 
+observations (n = 1,847), following the methods described in @sec-method-new-model. 
+The result of the screening model is shown in @tbl-updated-model-screening. Ankle-level air speed,
 whole-body thermal sensation, and ankle coverage status (uncovered vs.
 covered) were significantly correlated with ankle draft dissatisfaction,
-whereas room air temperature, ankle-level air temperature, and
-turbulence intensity were not significant within the range investigated
+whereas room air temperature, ankle-level air temperature, turbulence intensity, 
+and sex were not significant within the range investigated
 in this study. The data source was also not statistically significant,
 suggesting that no significant systematic difference remained between
 the two datasets after accounting for the measured predictors.
@@ -1170,7 +1207,7 @@ ankle draft dissatisfaction under the ankle-uncovered and ankle-covered
 conditions, using ankle-level air speed and whole-body thermal sensation
 as predictors. As shown in @tbl-updated-model-final, the two final
 models had the same structure but different coefficients. The intercept
-of the covered model was `r sprintf("%.2f", abs(glmm_delta_intercept))`
+of the covered model was `r sprintf("%.1f", abs(glmm_delta_intercept))`
 units lower than that of the uncovered model, indicating a lower
 baseline risk of ankle draft dissatisfaction when the ankle was covered
 by clothing. In addition, the air speed coefficient was smaller in the
@@ -1186,8 +1223,7 @@ conditions.
 knitr::kable(
   model_final_table,
   col.names = c(
-    "Condition", "Predictor", "Estimate", "SE", "z", "p",
-    "Marginal R²", "Conditional R²"
+    "Condition", "Observations",  "Predictor", "Estimate", "SE", "z", "p", "Marginal R²", "Conditional R²"
   )
 )
 ```
@@ -1235,7 +1271,10 @@ the expected proportion of occupants dissatisfied under given conditions
 — rather than the thermal response of any individual occupant. The
 substantial inter-individual variability evident in Figures 3–6 is
 expected and is accounted for in the mixed-effects model structure
-through the random subject intercept.
+through the random subject intercept. In addition, the proposed model 
+was developed based on the experimental ranges covered by the present study and Liu‘s study. 
+Therefore, its application should account for the range of experimental 
+conditions represented in these datasets to avoid inappropriate extrapolation.
 
 # Discussion
 
@@ -1322,7 +1361,7 @@ environmental contrast.
 Thermal sensation changes are more closely associated with rapid
 variations in skin temperature than with absolute values
 [@ChoiInvestigationHumanBody2012; @KenshaloCoolThresholds1968]. In this
-study, ankle $\Delta T_{\text{sk}}$ relative to the baseline adaptation
+study, ankle skin temperature variation relative to the baseline adaptation
 period showed significant differences between low and medium/high air
 speed conditions across all ankle-level air temperature conditions
 (effect size *d* ≈
@@ -1489,7 +1528,7 @@ suggests that ankle coverage substantially reduces sensitivity to local
 draft, a conclusion supported by the covered-ankle model developed in
 this study; the model demonstrates both a lower baseline risk and a
 reduced response to air speed compared to uncovered-ankle models, with
-an intercept difference of approximately 1.5 units on the logit scale.
+an intercept difference of `r sprintf("%.1f", abs(glmm_delta_intercept))` units on the logit scale.
 
 Consistent with prior model structures, we found that whole-body thermal
 sensation and air speed at the ankle are the primary predictors of
@@ -1559,7 +1598,7 @@ California, Berkeley supported this research.
 The following figures show the full response distributions for thermal
 sensation, thermal preference, and air movement acceptability and
 preference. These complement the scatter plots with mixed-effects
-regression lines presented in @sec-results in the main text.
+regression lines presented in @sec-results in the main text. Table 7 summarizes the condition comparisons that showed statistically significant differences.
 
 ![Whole-body thermal sensation (a) and thermal preference (b) votes by
 ankle-level air temperature and air speed. Participants predominantly
@@ -1582,6 +1621,44 @@ air movement acceptable, though higher air speeds increased the
 preference for less air
 movement.](figs/supp_air_movement_acc_pref.png){#fig-supp-air-movement-acc-pref
 width="75%"}
+
+```{r}
+#| label: tbl-supp-pairwise-perception
+#| tbl-cap: "Significant pairwise comparisons for perception responses shown in Appendix A."
+#| echo: false
+
+supp_pairwise_perception_table <- dplyr::bind_rows(
+  thermal_sensation_overall_stats %>%
+    dplyr::mutate(Perception = "Thermal sensation, whole body"),
+  thermal_preference_overall_stats %>%
+    dplyr::mutate(Perception = "Thermal preference, whole body"),
+  thermal_sensation_ankles_stats %>%
+    dplyr::mutate(Perception = "Thermal sensation, ankles"),
+  thermal_preference_ankles_stats %>%
+    dplyr::mutate(Perception = "Thermal preference, ankles"),
+  air_movement_acceptability_stats %>%
+    dplyr::mutate(Perception = "Air movement acceptability, ankles"),
+  air_movement_preference_stats %>%
+    dplyr::mutate(Perception = "Air movement preference, ankles")
+) %>%
+  dplyr::filter(!is.na(p.adj), p.adj < 0.05) %>%
+  dplyr::transmute(
+    Perception,
+    Comparison,
+    Condition,
+    `Pairwise comparison`,
+    n,
+    `Mean group 1` = mean1,
+    `Mean group 2` = mean2,
+    `Adjusted p` = sprintf("%.3f", p.adj),
+    `Effect size r` = sprintf("%.3f", r)
+  )
+
+knitr::kable(
+  supp_pairwise_perception_table,
+  align = c("l", "l", "l", "l", "r", "r", "r", "r", "r")
+)
+```
 
 # Appendix B: Monte Carlo approximation of marginal predicted probabilities {#sec-appendix-b .unnumbered}
 

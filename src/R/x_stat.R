@@ -28,6 +28,91 @@ logistic_or_ci <- function(mod, term) {
 }
 
 
+# Pairwise Table Formatting ===================================================
+
+#' Format pairwise comparison results for manuscript tables
+#'
+#' Converts internal variable names such as `session_sat`, `workstation`,
+#' `group1`, and `group2` into reader-facing columns.
+#'
+#' @param stats A paired-comparison result table containing `comparison`,
+#'   `group1`, and `group2`, with optional `session_sat` and `workstation`.
+#' @return A tibble with manuscript-facing comparison columns first.
+format_pairwise_stats_table <- function(stats) {
+  n_rows <- nrow(stats)
+  
+  comparison_raw <- if ("comparison" %in% names(stats)) {
+    as.character(stats$comparison)
+  } else {
+    rep(NA_character_, n_rows)
+  }
+  
+  session_sat <- if ("session_sat" %in% names(stats)) {
+    as.character(stats$session_sat)
+  } else {
+    rep(NA_character_, n_rows)
+  }
+  
+  workstation <- if ("workstation" %in% names(stats)) {
+    as.character(stats$workstation)
+  } else {
+    rep(NA_character_, n_rows)
+  }
+  
+  group1 <- if ("group1" %in% names(stats)) {
+    as.character(stats$group1)
+  } else {
+    rep(NA_character_, n_rows)
+  }
+  
+  group2 <- if ("group2" %in% names(stats)) {
+    as.character(stats$group2)
+  } else {
+    rep(NA_character_, n_rows)
+  }
+  
+  format_air_speed_condition <- function(x) {
+    x_chr <- as.character(x)
+    x_lower <- tolower(x_chr)
+    
+    dplyr::case_when(
+      is.na(x_chr) ~ NA_character_,
+      x_lower == "low" ~ "Low air speed",
+      x_lower %in% c("med", "medium") ~ "Medium air speed",
+      x_lower == "high" ~ "High air speed",
+      TRUE ~ x_chr
+    )
+  }
+  
+  comparison_label <- dplyr::case_when(
+    comparison_raw == "Air speed within ankle temperature" ~ "Air speed",
+    comparison_raw == "Ankle temperature within air speed" ~ "Ankle temperature",
+    TRUE ~ comparison_raw
+  )
+  
+  condition_label <- dplyr::case_when(
+    comparison_raw == "Air speed within ankle temperature" ~ session_sat,
+    comparison_raw == "Ankle temperature within air speed" ~
+      format_air_speed_condition(workstation),
+    TRUE ~ NA_character_
+  )
+  
+  keep_cols <- setdiff(
+    names(stats),
+    c("comparison", "session_sat", "workstation", "group1", "group2")
+  )
+  
+  dplyr::bind_cols(
+    tibble::tibble(
+      Comparison = comparison_label,
+      Condition = condition_label,
+      `Pairwise comparison` = paste(group1, "vs.", group2)
+    ),
+    stats[keep_cols]
+  )
+}
+
+
 # Paired Comparisons ===========================================================
 
 #' Pairwise paired t-tests with BH adjustment. Computes Cohen's d effect sizes.
@@ -167,6 +252,12 @@ paired_wilcox_test <- function(data,
                                question_var,
                                value_var,
                                order_var = NULL) {
+
+  # Ordinal questionnaire responses are tested on their intended integer
+  # scale. Unlike base::round(), this treats x.5 as away from zero.
+  round_half_away_from_zero <- function(x) {
+    sign(x) * floor(abs(x) + 0.5)
+  }
   
   group_vars <- unique(Filter(Negate(is.null), c(group_by_var, within_var)))
   
@@ -186,7 +277,9 @@ paired_wilcox_test <- function(data,
       dat <- dat_long %>%
         dplyr::group_by(dplyr::across(all_of(c(subject_var, question_var)))) %>%
         dplyr::summarise(
-          value = dplyr::first(.data[[value_var]]),
+          value = round_half_away_from_zero(
+            dplyr::first(.data[[value_var]])
+          ),
           .groups = "drop"
         ) %>%
         tidyr::pivot_wider(
