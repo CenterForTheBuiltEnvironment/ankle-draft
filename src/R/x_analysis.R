@@ -86,13 +86,21 @@ format_median_iqr <- function(x, digits = 1) {
 
 # 2. Process the dataset
 demographic_d <- subjects %>%
-  dplyr::mutate(bmi = weight_kg / (height_m^2)) %>%
-  # Grouped summary (by sex)
+  dplyr::mutate(
+    bmi = weight_kg / (height_m^2),
+    # Map biological sex: three participants identified as third gender/other
+    sex = dplyr::case_when(
+      subject_id %in% c("ysl012", "lc023") ~ "female",
+      subject_id == "jt019"                ~ "male",
+      TRUE                                 ~ as.character(gender)
+    )
+  ) %>%
+  # Grouped summary (by biological sex)
   group_by(sex) %>%
   summarise(
     n = n(),
     age    = format_median_iqr(age, 1),
-    height = format_median_iqr(height_m, 2), # height usually needs 2 decimals
+    height = format_median_iqr(height_m, 2),
     weight = format_median_iqr(weight_kg, 1),
     bmi    = format_median_iqr(bmi, 1)
   ) %>%
@@ -124,13 +132,15 @@ env_airflow <- env_sessions %>%
   ) %>%
   dplyr::group_by(session_sat) %>%
   dplyr::summarise(
-    # Two decimal places
+    # Air speed: two decimal places (m/s)
     across(
-      .cols = c(
-        low_v_air_s, med_v_air_s, high_v_air_s,
-        low_turbulence_intensity, med_turbulence_intensity, high_turbulence_intensity
-      ),
+      .cols = c(low_v_air_s, med_v_air_s, high_v_air_s),
       .fns = \(x) paste0(round(mean(x, na.rm = TRUE), 2), " ( ± ", round(sd(x, na.rm = TRUE), 2), ")")
+    ),
+    # Turbulence intensity: one decimal place, converted from fraction to %
+    across(
+      .cols = c(low_turbulence_intensity, med_turbulence_intensity, high_turbulence_intensity),
+      .fns = \(x) paste0(round(mean(x, na.rm = TRUE) * 100, 1), " ( ± ", round(sd(x, na.rm = TRUE) * 100, 1), ")")
     ),
     # One decimal place
     across(
@@ -332,14 +342,31 @@ thermal_acceptability_d <- analysis %>%
 
 thermal_sensation_overall_d_raw <- dplyr::filter(thermal_sensation_d, question == "Overall")
 
-thermal_sensation_overall_stats <- paired_wilcox_test(
-  data         = thermal_sensation_overall_d_raw,
-  group_by_var = "session_sat",
-  subject_var  = "subject_id",
-  question_var = "workstation",
-  value_var    = "response_value_num",
-  order_var    = "timestamp"
-)
+thermal_sensation_overall_stats <- dplyr::bind_rows(
+  # Compare air-speed conditions within each ankle-temperature condition
+  paired_wilcox_test(
+    data = thermal_sensation_overall_d_raw,
+    group_by_var = "session_sat",
+    subject_var = "subject_id",
+    question_var = "workstation",
+    value_var = "response_value_num",
+    order_var = "timestamp"
+  ) %>%
+    dplyr::mutate(comparison = "Air speed within ankle temperature"),
+  
+  # Compare ankle-temperature conditions within each air-speed condition
+  paired_wilcox_test(
+    data = thermal_sensation_overall_d_raw,
+    group_by_var = "workstation",
+    subject_var = "subject_id",
+    question_var = "session_sat",
+    value_var = "response_value_num",
+    order_var = "timestamp"
+  ) %>%
+    dplyr::mutate(comparison = "Ankle temperature within air speed")
+) %>%
+  dplyr::relocate(comparison) %>%
+  format_pairwise_stats_table()
 
 thermal_sensation_overall_d <- stacked_pct_data_ws(
   thermal_sensation_overall_d_raw, response_value
@@ -353,14 +380,31 @@ thermal_sensation_overall_p <- thermal_sensation_overall_d_raw %>%
 
 thermal_preference_overall_d_raw <- dplyr::filter(thermal_preference_d, question == "Overall")
 
-thermal_preference_overall_stats <- paired_wilcox_test(
-  data         = thermal_preference_overall_d_raw,
-  group_by_var = "session_sat",
-  subject_var  = "subject_id",
-  question_var = "workstation",
-  value_var    = "response_value_num",
-  order_var    = "timestamp"
-)
+thermal_preference_overall_stats <- dplyr::bind_rows(
+  # Compare air-speed conditions within each ankle-temperature condition
+  paired_wilcox_test(
+    data = thermal_preference_overall_d_raw,
+    group_by_var = "session_sat",
+    subject_var = "subject_id",
+    question_var = "workstation",
+    value_var = "response_value_num",
+    order_var = "timestamp"
+  ) %>%
+    dplyr::mutate(comparison = "Air speed within ankle temperature"),
+  
+  # Compare ankle-temperature conditions within each air-speed condition
+  paired_wilcox_test(
+    data = thermal_preference_overall_d_raw,
+    group_by_var = "workstation",
+    subject_var = "subject_id",
+    question_var = "session_sat",
+    value_var = "response_value_num",
+    order_var = "timestamp"
+  ) %>%
+    dplyr::mutate(comparison = "Ankle temperature within air speed")
+) %>%
+  dplyr::relocate(comparison) %>%
+  format_pairwise_stats_table()
 
 thermal_preference_overall_d <- stacked_pct_data_ws(
   thermal_preference_overall_d_raw, response_value
@@ -368,7 +412,7 @@ thermal_preference_overall_d <- stacked_pct_data_ws(
 
 thermal_preference_overall_p <- thermal_preference_overall_d_raw %>%
   plot_stacked_pct_ws(response_value, thermal_preference_palette) +
-  labs(subtitle = "Thermal preference, whole body", x = NULL)
+  labs(subtitle = "Thermal preference, whole body", x = "Air speed (m/s)")
 
 # 2.4 Combined Sensation/Preference Figure -------------------------------------
 
@@ -446,14 +490,31 @@ ggsave(
 
 # 2.5 Thermal Acceptability ----------------------------------------------------
 
-thermal_acceptability_stats <- paired_t_test(
-  data         = thermal_acceptability_d,
-  group_by_var = "session_sat",
-  subject_var  = "subject_id",
-  question_var = "workstation",
-  value_var    = "response_value",
-  order_var    = "timestamp"
-)
+thermal_acceptability_stats <- dplyr::bind_rows(
+  # Compare air-speed conditions within each ankle-temperature condition
+  paired_t_test(
+    data = thermal_acceptability_d,
+    group_by_var = "session_sat",
+    subject_var = "subject_id",
+    question_var = "workstation",
+    value_var = "response_value",
+    order_var = "timestamp"
+  ) %>%
+    dplyr::mutate(comparison = "Air speed within ankle temperature"),
+  
+  # Compare ankle-temperature conditions within each air-speed condition
+  paired_t_test(
+    data = thermal_acceptability_d,
+    group_by_var = "workstation",
+    subject_var = "subject_id",
+    question_var = "session_sat",
+    value_var = "response_value",
+    order_var = "timestamp"
+  ) %>%
+    dplyr::mutate(comparison = "Ankle temperature within air speed")
+) %>%
+  dplyr::relocate(comparison) %>%
+  format_pairwise_stats_table()
 
 thermal_acceptability_p <- thermal_acceptability_d %>%
   ggplot(aes(x = workstation, y = response_plot)) +
@@ -571,14 +632,31 @@ ggsave(
 
 thermal_sensation_ankles_d_raw <- dplyr::filter(thermal_sensation_d, question == "Ankles")
 
-thermal_sensation_ankles_stats <- paired_wilcox_test(
-  data         = thermal_sensation_ankles_d_raw,
-  group_by_var = "session_sat",
-  subject_var  = "subject_id",
-  question_var = "workstation",
-  value_var    = "response_value_num",
-  order_var    = "timestamp"
-)
+thermal_sensation_ankles_stats <- dplyr::bind_rows(
+  # Compare air-speed conditions within each ankle-temperature condition
+  paired_wilcox_test(
+    data = thermal_sensation_ankles_d_raw,
+    group_by_var = "session_sat",
+    subject_var = "subject_id",
+    question_var = "workstation",
+    value_var = "response_value_num",
+    order_var = "timestamp"
+  ) %>%
+    dplyr::mutate(comparison = "Air speed within ankle temperature"),
+  
+  # Compare ankle-temperature conditions within each air-speed condition
+  paired_wilcox_test(
+    data = thermal_sensation_ankles_d_raw,
+    group_by_var = "workstation",
+    subject_var = "subject_id",
+    question_var = "session_sat",
+    value_var = "response_value_num",
+    order_var = "timestamp"
+  ) %>%
+    dplyr::mutate(comparison = "Ankle temperature within air speed")
+) %>%
+  dplyr::relocate(comparison) %>%
+  format_pairwise_stats_table()
 
 thermal_sensation_ankles_d <- stacked_pct_data_ws(
   thermal_sensation_ankles_d_raw, response_value
@@ -592,14 +670,31 @@ thermal_sensation_ankles_p <- thermal_sensation_ankles_d_raw %>%
 
 thermal_preference_ankles_d_raw <- dplyr::filter(thermal_preference_d, question == "Ankles")
 
-thermal_preference_ankles_stats <- paired_wilcox_test(
-  data         = thermal_preference_ankles_d_raw,
-  group_by_var = "session_sat",
-  subject_var  = "subject_id",
-  question_var = "workstation",
-  value_var    = "response_value_num",
-  order_var    = "timestamp"
-)
+thermal_preference_ankles_stats <- dplyr::bind_rows(
+  # Compare air-speed conditions within each ankle-temperature condition
+  paired_wilcox_test(
+    data = thermal_preference_ankles_d_raw,
+    group_by_var = "session_sat",
+    subject_var = "subject_id",
+    question_var = "workstation",
+    value_var = "response_value_num",
+    order_var = "timestamp"
+  ) %>%
+    dplyr::mutate(comparison = "Air speed within ankle temperature"),
+  
+  # Compare ankle-temperature conditions within each air-speed condition
+  paired_wilcox_test(
+    data = thermal_preference_ankles_d_raw,
+    group_by_var = "workstation",
+    subject_var = "subject_id",
+    question_var = "session_sat",
+    value_var = "response_value_num",
+    order_var = "timestamp"
+  ) %>%
+    dplyr::mutate(comparison = "Ankle temperature within air speed")
+) %>%
+  dplyr::relocate(comparison) %>%
+  format_pairwise_stats_table()
 
 thermal_preference_ankles_d <- stacked_pct_data_ws(
   thermal_preference_ankles_d_raw, response_value
@@ -709,21 +804,40 @@ air_movement_acceptability_summary <- air_movement_acceptability_d %>%
   dplyr::ungroup() %>%
   dplyr::select(session_sat, workstation, acceptability, n, pct, pct_label)
 
-air_movement_acceptability_stats <- paired_wilcox_test(
-  data = dplyr::mutate(
-    air_movement_acceptability_d,
+air_movement_acceptability_stats_d <- air_movement_acceptability_d %>%
+  dplyr::mutate(
     acceptability_num = dplyr::case_when(
       acceptability == "Unacceptable" ~ 0,
       acceptability == "Acceptable"   ~ 1,
       TRUE                            ~ NA_real_
     )
-  ),
-  group_by_var = "session_sat",
-  subject_var  = "subject_id",
-  question_var = "workstation",
-  value_var    = "acceptability_num",
-  order_var    = "timestamp"
-)
+  )
+
+air_movement_acceptability_stats <- dplyr::bind_rows(
+  # Compare air-speed conditions within each ankle-temperature condition
+  paired_wilcox_test(
+    data = air_movement_acceptability_stats_d,
+    group_by_var = "session_sat",
+    subject_var = "subject_id",
+    question_var = "workstation",
+    value_var = "acceptability_num",
+    order_var = "timestamp"
+  ) %>%
+    dplyr::mutate(comparison = "Air speed within ankle temperature"),
+  
+  # Compare ankle-temperature conditions within each air-speed condition
+  paired_wilcox_test(
+    data = air_movement_acceptability_stats_d,
+    group_by_var = "workstation",
+    subject_var = "subject_id",
+    question_var = "session_sat",
+    value_var = "acceptability_num",
+    order_var = "timestamp"
+  ) %>%
+    dplyr::mutate(comparison = "Ankle temperature within air speed")
+) %>%
+  dplyr::relocate(comparison) %>%
+  format_pairwise_stats_table()
 
 air_movement_acceptability_p <- air_movement_acceptability_d %>%
   plot_stacked_pct_ws(
@@ -762,14 +876,31 @@ air_movement_preference_summary <- air_movement_preference_d %>%
   dplyr::ungroup() %>%
   dplyr::select(session_sat, workstation, acceptability, n, pct, pct_label)
 
-air_movement_preference_stats <- paired_wilcox_test(
-  data         = air_movement_preference_d,
-  group_by_var = "session_sat",
-  subject_var  = "subject_id",
-  question_var = "workstation",
-  value_var    = "response_value_num",
-  order_var    = "timestamp"
-)
+air_movement_preference_stats <- dplyr::bind_rows(
+  # Compare air-speed conditions within each ankle-temperature condition
+  paired_wilcox_test(
+    data = air_movement_preference_d,
+    group_by_var = "session_sat",
+    subject_var = "subject_id",
+    question_var = "workstation",
+    value_var = "response_value_num",
+    order_var = "timestamp"
+  ) %>%
+    dplyr::mutate(comparison = "Air speed within ankle temperature"),
+  
+  # Compare ankle-temperature conditions within each air-speed condition
+  paired_wilcox_test(
+    data = air_movement_preference_d,
+    group_by_var = "workstation",
+    subject_var = "subject_id",
+    question_var = "session_sat",
+    value_var = "response_value_num",
+    order_var = "timestamp"
+  ) %>%
+    dplyr::mutate(comparison = "Ankle temperature within air speed")
+) %>%
+  dplyr::relocate(comparison) %>%
+  format_pairwise_stats_table()
 
 air_movement_preference_p <- air_movement_preference_d %>%
   plot_stacked_pct_ws(acceptability, palette = air_movement_preference_palette) +
@@ -1123,12 +1254,12 @@ ggsave(
 # Combined figure
 
 model_performance_p <- (Liumodel_calibrationcurve | model_error_p) +
-  plot_layout(widths = c(1.5, 1)) +
+  plot_layout(widths = c(1.5, 1.5)) +
   plot_annotation(tag_levels = "a", tag_suffix = ".") &
   theme(
     plot.subtitle    = element_text(hjust = 0.05, margin = margin(b = 3, unit = "mm")),
     plot.tag         = element_text(size = 7, face = "bold"),
-    plot.margin      = margin(b = 2, r = 5, unit = "mm"),
+    plot.margin      = margin(b = 2, r = 0, unit = "mm"),
   )
 
 ggsave(
@@ -1152,15 +1283,22 @@ analysis_all <- bind_rows(
     ) %>%
     dplyr::filter(workstation != "adaptation") %>%
     dplyr::mutate(response_value = as.numeric(response_value)) %>%
-    dplyr::select(timestamp,subject_id,workstation,t_supply_c, t_air_c, v_air_m_s,question,response_value, turbulence_intensity) %>%
+    dplyr::select(timestamp,subject_id,gender,workstation,t_supply_c, t_air_c, v_air_m_s,question,response_value, turbulence_intensity) %>%
     dplyr::mutate(source = "toby",clothing_type = "long"),
   
   analysis_liu %>%
     dplyr::filter(workstation != "adaptation") %>%
     dplyr::mutate(response_value = as.numeric(response_value)) %>%
-    dplyr::select(timestamp,subject_id,workstation,t_supply_c, t_air_c, v_air_m_s,question,response_value, clothing_type, turbulence_intensity) %>%
+    dplyr::select(timestamp,subject_id,gender,workstation,t_supply_c, t_air_c, v_air_m_s,question,response_value, clothing_type, turbulence_intensity) %>%
     mutate(source = "liu")
-)
+) %>%
+  dplyr::mutate(
+    sex = dplyr::case_when(
+      subject_id %in% c("ysl012", "lc023") ~ "female",
+      subject_id == "jt019" ~ "male",
+      TRUE ~ as.character(gender)
+    )
+  )
 
 new_model <- analysis_all %>%
   dplyr::arrange(subject_id, workstation, t_supply_c, v_air_m_s, t_air_c, question, timestamp) %>%
@@ -1168,7 +1306,7 @@ new_model <- analysis_all %>%
   dplyr::mutate(rep_id = dplyr::row_number()) %>%
   dplyr::ungroup() %>%
   tidyr::pivot_wider(
-    id_cols = c(t_supply_c, v_air_m_s, t_air_c, subject_id, workstation, rep_id, source, clothing_type, turbulence_intensity),
+    id_cols = c(t_supply_c, v_air_m_s, t_air_c, subject_id,sex, workstation, rep_id, source, clothing_type, turbulence_intensity),
     names_from = question,
     values_from = response_value
   ) %>%
@@ -1198,7 +1336,7 @@ tibble::enframe(ctr_means, name = "variable", value = "mean (centering reference
 
 # Full model for predictor screening (not the final model) ----------------
 model_input <- glmer(
-  dissatisfied_with_draft_ankles~ v_air_m_s + t_air_c + t_supply_c + thermal_sensation + turbulence_intensity + clothing_type + source + (1 |subject_id),
+  dissatisfied_with_draft_ankles~ v_air_m_s + sex + t_air_c + t_supply_c + thermal_sensation + turbulence_intensity + clothing_type + source + (1 |subject_id),
   data = new_model_c,
   family = binomial(link = "logit"),
   control = glmerControl(optimizer = "bobyqa")
@@ -1309,7 +1447,7 @@ cf_unexposed <- coef(m_approx_unexposed)
 
 plot_grid_exposed <- expand_grid(
   TS = seq(-3, 3, length.out = 300),
-  V  = seq(0, 1, length.out = 300)
+  V  = seq(0, 1.3, length.out = 300)
 ) %>%
   mutate(
     eta = cf_exposed[1] + cf_exposed[2] * V + cf_exposed[3] * TS,
@@ -1318,7 +1456,7 @@ plot_grid_exposed <- expand_grid(
 
 plot_grid_unexposed <- expand_grid(
   TS = seq(-3, 3, length.out = 300),
-  V  = seq(0, 1, length.out = 300)
+  V  = seq(0, 1.3, length.out = 300)
 ) %>%
   mutate(
     eta = cf_unexposed[1] + cf_unexposed[2] * V + cf_unexposed[3] * TS,
@@ -1431,6 +1569,13 @@ tsk_timecourse_p <- plot_timecourse_mean_sd(
     breaks = c(-10, 0, 5, 10, 15, 20),
     labels = c("Adaptation", "0", "5", "10", "15", "20"),
     limits = c(-20, 20)
+  ) +
+  theme_minimal(base_size = 9) +
+  theme(
+    axis.text = element_text(size = 9),
+    strip.text.x = element_text(size = 9),
+    legend.position = "top",
+    strip.text.y = element_blank()
   )
 
 # 2) Stable skin temperature (last 5 minutes) ----------------------------------
@@ -1545,11 +1690,17 @@ tsk_delta_last1_paired_ttest <- paired_t_test(
 
 tsk_timecourse_delta_p <- plot_timecourse_mean_sd(
   tsk_timecourse_delta_summary,
-  y_lab = expression(Delta * "Skin temperature from baseline (" * degree * "C)")
+  y_lab = expression(Delta * "Skin temperature (" * degree * "C)")
 ) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "grey50", linewidth = 0.4) +
   scale_x_continuous(breaks = seq(0, 20, by = 5), limits = c(0, 20)) +
-  theme(legend.position = "none")
+  theme_minimal(base_size = 9) +
+  theme(
+    axis.text = element_text(size = 9),
+    strip.text.x = element_text(size = 9),
+    legend.position = "none",
+    strip.text.y = element_blank()
+  )
 
 # 5) Delta skin temperature estimation ----------------------------------------
 
@@ -1647,12 +1798,13 @@ tsk_delta_extrapolation_p <- ggplot() +
   scale_x_continuous(breaks = seq(0, 90, by = 15), limits = c(0, 90)) +
   labs(
     x = "Time (min)",
-    y = expression(Delta * "Skin temperature from baseline (" * degree * "C)"),
+    y = expression(Delta * "Skin temperature (" * degree * "C)"),
     color = "Air speed"
   ) +
-  theme_minimal(base_size = 7) +
+  theme_minimal(base_size = 10) +
   theme(
     panel.grid.minor = element_blank(),
+    axis.text = element_text(size = 10),
     legend.position = "top",
     strip.text = element_text()
   )
@@ -1671,7 +1823,7 @@ tsk_p <- (tsk_timecourse_p / tsk_timecourse_delta_p) +
   plot_annotation(tag_levels = "a", tag_suffix = ".") &
   theme(
     plot.subtitle = element_text(hjust = 0.05, margin = margin(b = 3, unit = "mm")),
-    plot.tag = element_text(size = 7, face = "bold"),
+    plot.tag = element_text(size = 8, face = "bold"),
     plot.margin = margin(b = 5, unit = "mm"),
     axis.title = element_text(margin = margin(r = 2, unit = "mm")),
     legend.margin = margin(l = 3, unit = "mm")
@@ -1824,6 +1976,10 @@ p_exposed_amp  <- plot_draft_model(
   plot_grid_exposed_amp,
   "a.",
   "Ankle Uncovered",
+  label_y = 1.055,
+  tick_y_top = 1.018,
+  tick_y_bottom = 1.002,
+  y_limits = c(0, 1),
   stagger_labels = TRUE,
   omit_label_levels = 10,
   omit_contour_levels = 10
@@ -1833,6 +1989,10 @@ p_unexposed_amp <- plot_draft_model(
   plot_grid_unexposed_amp,
   "b.",
   "Ankle Covered",
+  label_y = 1.055,
+  tick_y_top = 1.018,
+  tick_y_bottom = 1.002,
+  y_limits = c(0, 1),
   stagger_labels = TRUE,
   omit_label_levels = 10,
   omit_contour_levels = 10
@@ -1869,3 +2029,5 @@ model_formula_amp <- tibble(
     probability_formula = paste0("P = exp(", eta, ")/(1 + exp(", eta, "))"
     )
   )
+
+rm(grid_base)

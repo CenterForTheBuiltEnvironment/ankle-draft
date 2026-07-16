@@ -164,13 +164,14 @@ plot_timecourse_mean_sd <- function(data, y_lab, show_ribbon = TRUE) {
       color = "Air speed",
       fill = "Air speed"
     ) +
-    theme_minimal(base_size = 7) +
+    theme_minimal(base_size = 8) +
     theme(
       panel.grid.major.x = element_blank(),
       panel.grid.minor.x = element_blank(),
       panel.grid.minor = element_blank(),
       axis.ticks.x = element_blank(),
-      axis.text.x = element_text(margin = margin(t = 4)),
+      axis.text = element_text(size = 8),
+      axis.text.x = element_text(size = 8, margin = margin(t = 4)),
       legend.position = "top",
       strip.text = element_text()
     )
@@ -395,11 +396,28 @@ format_r2 <- function(data, x_var, y_var, color_var, level_order) {
     paste0("R²: ", .)
 }
 
+# Returns a named vector of HTML legend labels: group name on line 1,
+# R² value in brackets on line 2 (darker grey, 7pt).
+make_r2_labels <- function(data, x_var, y_var, color_var, palette) {
+  r2_vals <- compute_lme_stats(data, x_var, y_var, color_var) %>%
+    dplyr::arrange(factor(.data[[color_var]], levels = names(palette))) %>%
+    dplyr::pull(r2)
+  setNames(
+    paste0(
+      names(palette),
+      "<br><span style='color:#666666; font-size:7pt;'>(",
+      sprintf("%.2f", r2_vals),
+      ")</span>"
+    ),
+    names(palette)
+  )
+}
+
 #' Generic scatter + LME panel (full y-scale enforced by limits; inside legend)
 plot_scatter_lm <- function(data, x_var, y_var, color_var, palette,
                             x_label, y_label, y_breaks, y_labels,
                             color_title, x_breaks = NULL, x_limits = NULL) {
-  r2_sub    <- format_r2(data, x_var, y_var, color_var, names(palette))
+  r2_labels <- make_r2_labels(data, x_var, y_var, color_var, palette)
   pred_data <- compute_lme_predictions(data, x_var, y_var, color_var)
   ggplot(data, aes(x = .data[[x_var]], y = .data[[y_var]],
                    color = .data[[color_var]])) +
@@ -415,7 +433,11 @@ plot_scatter_lm <- function(data, x_var, y_var, color_var, palette,
       aes(x = .data[[x_var]], y = fit, color = .data[[color_var]]),
       linewidth = 0.7, inherit.aes = FALSE
     ) +
-    scale_color_manual(values = palette, name = color_title) +
+    scale_color_manual(
+      values = palette,
+      name   = paste0(color_title, "<br><span style='color:#666666; font-size:7pt;'>(R²)</span>"),
+      labels = r2_labels
+    ) +
     scale_fill_manual(values = palette, guide = "none") +
     scale_x_continuous(breaks = x_breaks, limits = x_limits) +
     scale_y_continuous(
@@ -425,23 +447,22 @@ plot_scatter_lm <- function(data, x_var, y_var, color_var, palette,
       expand = expansion(add = 0.15)
     ) +
     guides(color = guide_legend(nrow = 1, override.aes = list(alpha = 1, size = 2, fill = NA, linetype = 0))) +
-    labs(x = x_label, y = y_label, subtitle = r2_sub) +
-    theme_minimal(base_size = 7) +
+    labs(x = x_label, y = y_label) +
+    theme_minimal(base_size = 8) +
     theme(
       panel.grid.major     = element_blank(),
       panel.grid.minor     = element_blank(),
       axis.ticks.y         = element_line(color = "grey", linewidth = 0.25),
       axis.ticks.x         = element_line(color = "grey", linewidth = 0.25),
       axis.ticks.length    = unit(1, "mm"),
+      axis.text            = element_text(size = 7),
       axis.title.x         = element_text(margin = margin(t = 6)),
       legend.position      = "top",
       legend.direction     = "horizontal",
-      legend.title         = element_text(size = 7),
-      legend.text          = element_text(size = 7),
+      legend.title         = ggtext::element_markdown(size = 8),
+      legend.text          = ggtext::element_markdown(size = 8),
       legend.key.size      = unit(3, "mm"),
-      legend.key           = element_blank(),
-      plot.subtitle        = element_text(size = 7, hjust = 0.5, color = "grey40",
-                                          margin = margin(t = 0, b = 1, unit = "mm"))
+      legend.key           = element_blank()
     )
 }
 
@@ -449,7 +470,7 @@ plot_scatter_lm <- function(data, x_var, y_var, color_var, palette,
 plot_acc_scatter <- function(data, x_var, color_var, palette,
                              x_label, y_label, color_title,
                              x_breaks = NULL, x_limits = NULL) {
-  r2_sub    <- format_r2(data, x_var, "response_plot", color_var, names(palette))
+  r2_labels <- make_r2_labels(data, x_var, "response_plot", color_var, palette)
   pred_data <- compute_lme_predictions(data, x_var, "response_plot", color_var)
   ggplot(data, aes(x = .data[[x_var]], y = response_plot,
                    color = .data[[color_var]])) +
@@ -478,7 +499,11 @@ plot_acc_scatter <- function(data, x_var, color_var, palette,
       aes(x = .data[[x_var]], y = fit, color = .data[[color_var]]),
       linewidth = 0.7, inherit.aes = FALSE
     ) +
-    scale_color_manual(values = palette, name = color_title) +
+    scale_color_manual(
+      values = palette,
+      name   = paste0(color_title, "<br><span style='color:#666666; font-size:7pt;'>(R²)</span>"),
+      labels = r2_labels
+    ) +
     scale_fill_manual(values = palette, guide = "none") +
     scale_x_continuous(breaks = x_breaks, limits = x_limits) +
     scale_y_continuous(
@@ -491,23 +516,22 @@ plot_acc_scatter <- function(data, x_var, color_var, palette,
       expand = expansion(add = 0)
     ) +
     guides(color = guide_legend(nrow = 1, override.aes = list(alpha = 1, size = 2, fill = NA, linetype = 0))) +
-    labs(x = x_label, y = y_label, subtitle = r2_sub) +
-    theme_minimal(base_size = 7) +
+    labs(x = x_label, y = y_label) +
+    theme_minimal(base_size = 8) +
     theme(
       panel.grid.major  = element_blank(),
       panel.grid.minor  = element_blank(),
       axis.ticks.y      = element_line(color = "grey", linewidth = 0.25),
       axis.ticks.x      = element_line(color = "grey", linewidth = 0.25),
       axis.ticks.length = unit(1, "mm"),
+      axis.text         = element_text(size = 8),
       axis.title.x      = element_text(margin = margin(t = 6)),
       legend.position   = "top",
       legend.direction  = "horizontal",
-      legend.title      = element_text(size = 7),
-      legend.text       = element_text(size = 7),
+      legend.title      = ggtext::element_markdown(size = 8),
+      legend.text       = ggtext::element_markdown(size = 8),
       legend.key.size   = unit(3, "mm"),
-      legend.key        = element_blank(),
-      plot.subtitle     = element_text(size = 7, hjust = 0.5, color = "grey40",
-                                       margin = margin(t = 0, b = 1, unit = "mm"))
+      legend.key        = element_blank()
     )
 }
 
@@ -521,14 +545,23 @@ no_y_theme <- theme(
 patchwork_theme <- list(
   plot_annotation(tag_levels = "a", tag_suffix = "."),
   theme(
-    plot.tag      = element_text(size = 7, face = "bold"),
+    plot.tag      = element_text(size = 8, face = "bold"),
     axis.title    = element_text(margin = margin(r = 2, unit = "mm")),
     legend.margin = margin(l = 3, unit = "mm")
   )
 )
 
 
-plot_draft_model <- function(data, label, subtitle_text, stagger_labels = FALSE, omit_label_levels = NULL, omit_contour_levels = NULL){
+plot_draft_model <- function(data,
+                             label,
+                             subtitle_text,
+                             stagger_labels = FALSE,
+                             omit_label_levels = NULL,
+                             omit_contour_levels = NULL,
+                             label_y = 1.355,
+                             tick_y_top = 1.318,
+                             tick_y_bottom = 1.302,
+                             y_limits = c(0, 1.3)){
   
   ppd_levels <- setdiff(c(10,20,40,60,80), omit_contour_levels)
   
@@ -543,10 +576,6 @@ plot_draft_model <- function(data, label, subtitle_text, stagger_labels = FALSE,
   contour_length <- function(line) {
     sum(sqrt(diff(line$x)^2 + diff(line$y)^2))
   }
-  
-  label_y <- 1.055
-  tick_y_top <- 1.018
-  tick_y_bottom <- 1.002
   
   contour_labels <- purrr::map_dfr(seq_along(ppd_levels), function(i) {
     level <- ppd_levels[i]
@@ -610,6 +639,14 @@ plot_draft_model <- function(data, label, subtitle_text, stagger_labels = FALSE,
       color = "#99d98c",
       linewidth = 1
     ) +
+
+    geom_segment(
+      data = contour_labels,
+      aes(x = tick_x, xend = tick_x, y = tick_y_bottom, yend = tick_y_top),
+      inherit.aes = FALSE,
+      linewidth = 0.35,
+      color = "#2d6a4f"
+    ) +
     
     geom_text(
       data = dplyr::filter(contour_labels, !is.na(prefix_label)),
@@ -643,10 +680,10 @@ plot_draft_model <- function(data, label, subtitle_text, stagger_labels = FALSE,
                  "Slightly\nwarm","Warm","Hot")
     ) +
     
-    coord_cartesian(xlim = c(-3,3), ylim = c(0,1), expand = FALSE, clip = "off") +
+    coord_cartesian(xlim = c(-3,3), ylim = y_limits, expand = FALSE, clip = "off") +
     
     
-    theme_classic(base_size = 9) +
+    theme_classic(base_size = 10) +
     
     theme(
       plot.tag = element_text(size = 9, face = "bold"),
@@ -657,7 +694,7 @@ plot_draft_model <- function(data, label, subtitle_text, stagger_labels = FALSE,
       ),
       axis.title.x = element_text(margin = margin(t= 3, unit = "mm")),
       axis.title.y.right = element_text(angle = 90, margin = margin(l = 3, unit = "mm")),
-      plot.margin = margin(t = ifelse(stagger_labels, 11, 8), r = 3, b = 2, l = 6, unit = "mm")
+      plot.margin = margin(t = ifelse(stagger_labels, 11, 8), r = 2, b = 2, l = 2, unit = "mm")
     ) +
     
     
