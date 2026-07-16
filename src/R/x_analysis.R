@@ -86,13 +86,21 @@ format_median_iqr <- function(x, digits = 1) {
 
 # 2. Process the dataset
 demographic_d <- subjects %>%
-  dplyr::mutate(bmi = weight_kg / (height_m^2)) %>%
-  # Grouped summary (by gender)
-  group_by(gender) %>%
+  dplyr::mutate(
+    bmi = weight_kg / (height_m^2),
+    # Map biological sex: three participants identified as third gender/other
+    sex = dplyr::case_when(
+      subject_id %in% c("ysl012", "lc023") ~ "female",
+      subject_id == "jt019"                ~ "male",
+      TRUE                                 ~ as.character(gender)
+    )
+  ) %>%
+  # Grouped summary (by biological sex)
+  group_by(sex) %>%
   summarise(
     n = n(),
     age    = format_median_iqr(age, 1),
-    height = format_median_iqr(height_m, 2), # height usually needs 2 decimals
+    height = format_median_iqr(height_m, 2),
     weight = format_median_iqr(weight_kg, 1),
     bmi    = format_median_iqr(bmi, 1)
   ) %>%
@@ -101,7 +109,7 @@ demographic_d <- subjects %>%
     subjects %>%
       dplyr::mutate(bmi = weight_kg / (height_m^2)) %>%
       summarise(
-        gender = "all",
+        sex = "all",
         n = n(),
         age    = format_median_iqr(age, 1),
         height = format_median_iqr(height_m, 2),
@@ -110,7 +118,7 @@ demographic_d <- subjects %>%
       ),
     .
   ) %>%
-  mutate(gender = stringr::str_to_title(gender))
+  mutate(sex = stringr::str_to_title(sex))
 
 # 1.2 Environmental Conditions -------------------------------------------------
 

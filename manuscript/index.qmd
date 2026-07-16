@@ -140,7 +140,10 @@ The current approach to evaluating ankle draft risk relies on a
 predictive model presented in @liuPredictedPercentageDissatisfied2017,
 which estimates the predicted percentage dissatisfied (PPD) with ankle
 draft as a function of air speed and temperature at ankle level, as well
-as whole-body thermal sensation. This model was derived from laboratory
+as whole-body thermal sensation, all factors previously identified as
+key modulators of draft sensitivity
+[@toftumDraughtSensitivityInfluenced1996;
+@oguroEvaluationEffectAir2001]. This model was derived from laboratory
 experiments conducted under cooling conditions typical of underfloor air
 distribution (UFAD) and displacement ventilation systems and is
 incorporated into ASHRAE Standard 55 [@ashraeANSIASHRAEStandard2023].
@@ -154,12 +157,13 @@ However, building occupants in winter typically wear substantially
 different attire. Analysis of the ASHRAE Global Thermal Comfort Database
 II [@foldvarylicinaDevelopmentASHRAEGlobal2018] indicates that median
 clothing insulation in commercial spaces during heating seasons is
-approximately 0.75 clo, with occupants commonly wearing long trousers,
-closed-toe shoes and socks that cover the ankle region. This discrepancy
-raises an important question: does the current ankle draft model, which
-is calibrated for summer conditions and derived from experiments where
-approximately two-thirds of test cases involved exposed ankles,
-accurately predict discomfort when ankles are covered by clothing?
+approximately 0.75 clo [@iso9920], with occupants commonly wearing long
+trousers, closed-toe shoes and socks that cover the ankle region. This
+discrepancy raises an important question: does the current ankle draft
+model, which is calibrated for summer conditions and derived from
+experiments where approximately two-thirds of test cases involved
+exposed ankles, accurately predict discomfort when ankles are covered by
+clothing?
 
 If the current model overestimates draft risk under winter clothing
 conditions, the practical implications are significant. Designers may be
@@ -307,7 +311,7 @@ readr::read_csv("tables/survey_scales.csv") |>
 ## Participants
 
 We recruited
-`r demographic_d %>% dplyr::filter(gender == "All") %>% dplyr::pull(n)`
+`r demographic_d %>% dplyr::filter(sex == "All") %>% dplyr::pull(n)`
 participants from the university community and local area through the
 Experimental Social Science Laboratory (Xlab) platform and email
 outreach to individuals who had participated in previous studies and
@@ -504,19 +508,29 @@ in Appendix B.
 
 We conducted a simulation-based power analysis to assess whether our
 sample of 51 participants was statistically adequate to detect the
-primary effect of ankle air speed on draft dissatisfaction. Because no
-prior data existed for the covered-ankle condition, we used the GLMM
-fitted to the 88 exposed-ankle participants from
-@liuPredictedPercentageDissatisfied2017 as a conservative reference: the
-effect of air speed on dissatisfaction is expected to be smaller when
-ankles are covered, so demonstrating adequate power for the larger
-exposed-ankle effect constitutes a lower bound on power for our
-covered-ankle comparison. Using the `simr` package [@greenMacleod2016],
-we simulated 1,000 datasets at each of seven sample sizes ranging from
-10 to 88 and estimated the proportion of simulations in which the fixed
-effect of ankle air speed was detected at α = 0.05. Power reached 80% at
-N = 30 participants (95% CI: 79.9–84.7%), confirming that our sample of
-51 provided adequate statistical power.
+primary effect of ankle air speed on draft dissatisfaction. At the
+study-design stage, we used the existing short-duration experimental
+dataset from @liuPredictedPercentageDissatisfied2017 as the best
+available prior reference for a GLMM-based simulation sample-size
+assessment. Specifically, we fitted a GLMM to the
+@liuPredictedPercentageDissatisfied2017 dataset, which included 109
+participants, and used this model as the reference model to estimate the
+probability of detecting the fixed effect of ankle air speed across
+different sample sizes. This analysis was intended to provide a
+reference-scenario planning basis for the present sample size, rather
+than a definitive estimate of the true statistical power for the winter
+covered-ankle condition.
+
+Using the `simr` package [@greenMacleod2016], we simulated 1,000
+datasets at each of seven sample sizes ranging from 10 to 109
+participants and estimated the proportion of simulations in which the
+fixed effect of ankle air speed was detected at α = 0.05. The estimated
+power reached 90.1% at N = 30 participants (95% CI: 88.1–91.9%),
+exceeding the conventional 80% threshold. The estimated power for the
+present sample size of N = 51 was 99.2% (95% CI: 98.4–99.7%), indicating
+that the current sample size was sufficient to detect an air-speed
+effect comparable to that observed in the
+@liuPredictedPercentageDissatisfied2017 reference dataset.
 
 ## Software and data
 
@@ -536,28 +550,22 @@ https://github.com/CenterForTheBuiltEnvironment/ankle-draft.
 #| tbl-cap: "Summary of demographic information (median [IQR]) on study participants."
 
 knitr::kable(demographic_d,
-             col.names = c('Gender', 'No. Subjects', 'Age [a]', 'Height [m]', 'Weight [kg]', 'Body Mass Index (BMI)')
+             col.names = c('Sex', 'No. Subjects', 'Age [a]', 'Height [m]', 'Weight [kg]', 'Body Mass Index (BMI)')
 )
 
 ```
-
--   The Third Gender/Other category included one participant whose sex
-    was male (23 years, 1.60 m, 73 kg) and two participants whose sex
-    was female (22 years, 1.63 m, 68 kg; and 21 years, 1.60 m, 45 kg).
 
 @tbl-demographics provides a summary of the demographic information
 collected from the study participants. Since the demographic data was
 not uniformly distributed, we use the median and interquartile range
 (IQR) to describe the dataset. A total of
-`r demographic_d %>% dplyr::filter(gender == "All") %>% dplyr::pull(n)`
+`r demographic_d %>% dplyr::filter(sex == "All") %>% dplyr::pull(n)`
 subjects participated in the study
-(`r demographic_d %>% dplyr::filter(gender == "Female") %>% dplyr::pull(n)`
+(`r demographic_d %>% dplyr::filter(sex == "Female") %>% dplyr::pull(n)`
 female,
-`r demographic_d %>% dplyr::filter(gender == "Male") %>% dplyr::pull(n)`
-male,
-`r demographic_d %>% dplyr::filter(gender == "Third Gender / Other") %>% dplyr::pull(n)`
-other), with a median age of
-`r demographic_d %>% dplyr::filter(gender == "All") %>% dplyr::pull(age)`
+`r demographic_d %>% dplyr::filter(sex == "Male") %>% dplyr::pull(n)`
+male), with a median age of
+`r demographic_d %>% dplyr::filter(sex == "All") %>% dplyr::pull(age)`
 years.
 
 ```{r}
@@ -915,7 +923,7 @@ significance only at `r tsk_delta_sig_med_high`
 (`r sprintf("p_adj = %.3f", tsk_delta_sig_med_high_p)`). These findings
 indicate that increasing local airflow increases the short-term cooling
 response of the lower-leg skin and most noticeable temperature drops
-occur when shifting away from the lowest ai
+occur when shifting away from the lowest air speed.
 
 ![Time course of lower-leg skin temperature during the formal exposure
 phase across the nine experimental conditions for (a) absolute skin
@@ -1272,9 +1280,9 @@ Where, $PPD_{AD}$ is the predicted percentage dissatisfied with ankle
 draft, $V$ is air speed at ankle (m/s), and $TS$ is whole-body thermal
 sensation. Consistent with the PPD framework established by
 @fangerThermalComfortAnalysis1970 and adopted in ASHRAE Standard 55, the
-models are intended to predict population-average responses — that is,
-the expected proportion of occupants dissatisfied under given conditions
-— rather than the thermal response of any individual occupant. The
+models are intended to predict population-average responses, or the
+expected proportion of occupants dissatisfied under given conditions,
+rather than the thermal response of any individual occupant. The
 substantial inter-individual variability evident in Figures 3–6 is
 expected and is accounted for in the mixed-effects model structure
 through the random subject intercept. In addition, the proposed model
@@ -1598,8 +1606,10 @@ maintaining full accountability for the publication’s content.
 
 # Acknowledgements {.unnumbered}
 
-Schüco and the Center for the Built Environment at the University of
-California, Berkeley supported this research.
+This research was supported by Schüco and the Center for the Built
+Environment (CBE) at the University of California, Berkeley. The authors
+express their gratitude to Kit Elsworth for his valuable input and
+leadership throughout the project.
 
 # Appendix A: Response distributions {#sec-appendix-a .unnumbered}
 
